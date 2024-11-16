@@ -3,31 +3,31 @@
 \label{chap:Chapter2}
 
 This chapter is divided into three parts. 
-Part I starts on the theoretical side by introducing machine learning, Security Operation Centers, Security Information and Event Managers and advanced threat detection and response mechanisms such as IPS, IDS and EDR. 
-It also explains how popular ML classification models work and how to evaluate them. 
+Part I starts on the theoretical side by introducing Machine Learning, Security Operation Centers, Security Information and Event Managers and advanced threat detection and response mechanisms such as \gls{IPS}, \gls{IDS} and \gls{EDR}. 
+It also explains how popular \gls{ML} classification models work and how to evaluate them. 
 Understanding these topics is the groundwork for material considered later in the chapter.
 
-The second part focuses on current works on the automatic classification of security alert tickets. 
+The second part focuses on current works on the Automatic Classification of Security Alert Tickets. 
 It starts with general information about these systems and then reviews several publicly available datasets. 
 Finally, the chapter ends with a detailed assessment of existing systems similar to the one presented in this thesis.
 We have separated this analysis from the overview to explore their methods further.
 
-The third and final part discusses existing technologies that Security Operations Centers (SOCs) may utilize. 
-These technologies are designed to support the workflow outlined in the first section about SOCs. 
-At least three different technologies will be presented and discussed for each aspect of the SOC workflow. 
+The third and final part discusses existing technologies that \gls{SOC} may utilize. 
+These technologies are designed to support the workflow outlined in the first section about \gls{SOC}. 
+At least three different technologies will be presented and discussed for each aspect of the \gls{SOC} workflow. 
 The section will conclude with a summary of the key differences among the technologies and, if relevant, evaluate which one may be superior.
 
 \section{Theoretical Introduction}
 
 Before diving into the technologies, tools, and methodologies used for automating the classification of security alert tickets, it is essential to understand some fundamental concepts first. 
-These concepts include Security Operations Centers (SOC), Security Information and Event Management (SIEM) systems, artificial intelligence—particularly machine learning—and advanced threat detection and response mechanisms. 
+Concepts like, \gls{SOC}s, \gls{SIEM} systems, \gls{AI}—particularly \gls{ML}—and advanced threat detection and response mechanisms. 
 Such a foundation is indispensable for comprehending these systems' functions, construction work, advantages and limitations, and the actual performance comparison among different methods. 
-The chapter introduces SOC and how it functions, then moves on to the foundations of machine learning and provides an overview of models frequently used for classification problems. 
+The chapter introduces \gls{SOC} and how it functions diving into , then moves on to the foundations of \gls{ML} and provides an overview of models frequently used for classification problems. 
 It also provides an overview of the methods for assessing classification model performance to set this in context for how these are used within the project.
 
 \subsection{Security Operations Center} 
 
-The complexity and frequency of cyber threats are increasing \parencite{Arianna2024}, which has led to the emergence of the \gls{SOC} as a critical component of modern IT enterprises. 
+The complexity and frequency of cyber threats are increasing \parencite{Arianna2024}, which has led to the emergence of \gls{SOC}s as a critical component of modern IT enterprises. 
 \gls{SOC}s are the primary defenders in incident response planning, vulnerability management, and regulatory compliance. 
 In today's interconnected world, integrating security operations to reduce defensive barriers allows organizations to optimize resources, enhance security posture, and safeguard critical assets.
 
@@ -37,7 +37,7 @@ The main objective of a \gls{SOC} is to ensure continuous monitoring and inciden
 This primarily focuses on preventing unauthorized access, cyber-attacks, and data breaches.
 
 This 24/7 facility leverages advanced technologies and skilled information security professionals to monitor the network continuously \parencite{Zimmerman2014}. 
-With sophisticated tools to detect anomalies, the \gls{SOC} can address threats before they escalate.
+With sophisticated tools to detect anomalies, a \gls{SOC} can address threats before they escalate.
 
 \subsubsection{Definition and Characteristics of a SOC}
 \textcite{Zimmerman2014} defined a \gls{SOC} as:
@@ -65,7 +65,8 @@ A \gls{SOC} has several critical missions, as outlined by various sources \paren
 
 \subsubsection{Tiers of Operation}
 Analysts within a \gls{SOC} operate in tiers. 
-Tier 1 analysts monitor and conduct initial investigations, escalating complex cases to Tier 2 analysts, who perform in-depth analyses and take further actions like blocking activities or deactivating accounts. Generally, higher-tier analysts handle more complex incidents, which require more time to resolve.
+Tier 1 analysts monitor and conduct initial investigations, escalating complex cases to Tier 2 analysts, who perform in-depth analyses and take further actions like blocking activities or deactivating accounts. 
+Generally, higher-tier analysts handle more complex incidents, which require more time to resolve.
 
 \begin{figure}[ht]
     \centering
@@ -78,31 +79,115 @@ Extra levels may exist that handle responsibilities like threat hunting, vulnera
 These levels are collectively termed Tier 3+. 
 Figure~\ref{fig:soc-tier} was taken from a paper on a qualitative study on a \gls{SOC} \parencite{Kokulu2019} and illustrates a visual representation of these tiers and their associated tasks. 
 Not all \gls{SOC}s follow a hierarchical model. 
-In some collaborative frameworks, team members may possess comparable skill sets, enabling them to manage incidents independently.
+In some collaborative frameworks, team members may possess comparable skill sets, enabling them to manage incidents independently \parencite{Kokulu2019}.
 
 \subsubsection{Triage Specialist}
 
-Since this project focuses on automating the triage process, it is crucial to gain a detailed understanding of the role of a triage specialist, their functions, and the drawbacks of automated triage in comparison.
+Since this project focuses on automating the triage process, it is crucial to gain a detailed understanding of the role of a triage specialist, their functions, and the advantages of automated triage in comparison.
 
-Tier 1 analysts, also known as triage specialists, play a critical role in the initial stages of a Security Operations Center (SOC) workflow \parencite{Vielberth2020}. Their primary responsibilities include:
+Tier 1 analysts, also known as triage specialists, play a critical role in the initial stages of a \gls{SOC} workflow \parencite{Vielberth2020}. 
 
+As stated by \textcite{Vielberth2020}, a Tier 1 analyst's primary responsibilities include:
 \begin{enumerate}
     \item Collecting and analyzing raw data.
     \item Reviewing alarms and alerts generated by monitoring systems.
     \item Determining the validity and criticality of each alert.
 \end{enumerate}
 
-They must improve alerts with additional contextual information and decide whether an alert represents a real threat or a false positive \parencite{Hamornik2018, Sundaramurthy2014}. This process demands meticulous attention to detail, as the triage specialist must assess individual alerts, notify potential high-risk events, and prioritize them according to their severity. 
+They must improve alerts with additional contextual information and decide whether an alert represents a real threat or a false positive \parencite{Hamornik2018, Sundaramurthy2014}. This process demands meticulous attention to detail, as the triage specialist must assess individual alerts, notify potential high-risk events, and prioritize them according to their severity \parencite{Tao2018}. 
 
-The repetitive nature of triage work, coupled with the need to escalate unresolved issues to Tier 2 analysts, can result in mental fatigue and burnout \parencite{Tines2023}. This exhaustion affects individual performance and can compromise the overall efficiency of the SOC, as delayed or missed alerts may result in critical threats going undetected \parencite{CriticalStart2019}.
+The repetitive nature of triage work, coupled with the need to escalate unresolved issues to Tier 2 analysts, can result in mental fatigue and burnout \parencite{Tines2023, Iamnitchi2017}. This exhaustion affects individual performance and can compromise the overall efficiency of the \gls{SOC}, as delayed or missed alerts may result in critical threats going undetected \parencite{CriticalStart2019}.
+
+In a 2018 study \parencite{Crowley2018}, 53\% of respondents in a security survey identified inadequate automation as the most common shortcoming.
+
+This study demonstrates that effectively structured and implemented automation can help mitigate some or many of a \gls{SOC}'s weaknesses, particularly in the repetitive aspects of the \gls{SOC}'s workflow, such as the triage process.
 
 \subsection{Advanced Threat Detection and Response Mechanisms}
 
-\subsection{SIEM}
+\subsection{Security Information and Event Management}
+
+The increasing complexity of cybersecurity threats has compelled organizations to implement advanced technologies to protect their digital assets. 
+\gls{SIEM} systems have emerged as vital tools in this context.
+
+\gls{SIEM} systems gather and centralize security-related data to detect threats and respond to incidents effectively. 
+These systems connect logs from various sources to support security analytics, enabling real-time monitoring and retrospective analysis of past events \parencite{Shaw2022}.
+\gls{SIEM} systems normalize raw log data, correlate events, generate reports and issue alerts, and automate responses to security incidents using enriched contextual data \parencite{Vielberth2021}. 
+They integrate with cyber threat intelligence platforms, providing human analysts with advanced visual tools for seamless information sharing between organizations. 
+Additionally, they retain event data over extended periods, ensuring robust log management capabilities.
+
+The key features of a \gls{SIEM} system, as gathered from various published sources \parencite{Harper2010, Sheeraz2023, Ali2024}, are:
+
+\begin{itemize}
+    \item \textbf{Log Collection:} SIEM gathers log data from various network devices such as servers, firewalls, and switches. Data can be collected using two methods:
+    \begin{enumerate}
+        \item \textbf{Agent-based collection:} An intermediary agent collects and forwards logs.
+        \item \textbf{Agent-less collection:} Servers retrieve logs directly from the source devices.
+    \end{enumerate}
+    
+    \item \textbf{Log Aggregation:} Collected logs are analyzed and structured for meaningful insights. Aggregation methods include:
+    \begin{enumerate}
+        \item \textbf{Push method:} Devices actively send logs to the SIEM.
+        \item \textbf{Pull method:} SIEM retrieves logs as needed.
+    \end{enumerate}
+    
+    \item \textbf{Parsing and Normalization:} Parsing converts raw logs into structured data, while normalization standardizes logs from diverse sources to eliminate redundancy.
+    
+    \item \textbf{Threat Analysis and Detection:} By correlating log data with known threat indicators, SIEM systems identify malicious activities. Statistical methods and predefined rules enhance their ability to detect sophisticated threats.
+    
+    \item \textbf{Response Automation:} SIEM systems issue real-time alerts and notifications, enabling rapid responses to potential incidents.
+    
+    \item \textbf{Reporting and Visualization:} Advanced reporting tools provide security analysts with actionable insights, enabling detailed investigations and trend analysis.
+\end{itemize}
+
+\subsubsection{Architectural Components}
+
+The architectural components of a Security Information and Event Management (SIEM) system consist of several essential elements that enable effective security monitoring, incident detection, and response.
+
+Data sources provide the raw material for analysis and threat detection. These include a wide variety of log-generating devices and applications:
+\begin{itemize}
+    \item \textbf{Network devices}: Firewalls, routers, and switches.
+    \item \textbf{Endpoint devices}: Workstations, servers, and mobile devices.
+    \item \textbf{Applications}: Web servers, databases, and cloud platforms.
+\end{itemize}
+A diverse set of data sources is crucial to ensure comprehensive monitoring and the ability to detect a wide range of threats.
+
+\textbf{Data collection} is a critical step and can be broadly categorized into two approaches:
+\begin{itemize}
+    \item \textbf{Agent-based collection}: Proxy agents are deployed on endpoint devices, offering more control and flexibility over log collection. However, this method is resource-intensive and complex to manage.
+    \item \textbf{Agent-less collection}: Devices transmit data directly to the SIEM without intermediary agents, simplifying deployment but potentially limiting efficiency in high-volume data environments.
+\end{itemize}
+
+The \textbf{SIEM processing engine} is the core of the system, responsible for:
+\begin{itemize}
+    \item \textbf{Parsing}: Converting raw log data into a structured format.
+    \item \textbf{Normalization}: Standardizing diverse log formats to ensure consistency.
+    \item \textbf{Correlation}: Identifying relationships between events to uncover actionable insights.
+\end{itemize}
+
+\textbf{Storage and rationalization} are vital for ensuring scalability and compliance. SIEM systems must store logs for future analysis and meet regulatory requirements like GDPR or HIPAA. Effective storage solutions should scale dynamically to handle large datasets without compromising performance or compliance standards.
+
+\textbf{Visualization and reporting tools} play a key role in making data accessible and actionable. Dashboards provide real-time monitoring with intuitive interfaces, while customizable reports facilitate:
+\begin{itemize}
+    \item Incident investigations,
+    \item Trend analysis, and
+    \item Compliance audits.
+\end{itemize}
+
+\subsubsection{Integration with Other Security Tools}
+
+Integration with other security tools enhances the SIEM’s capabilities:
+\begin{itemize}
+    \item \textbf{Endpoint Detection and Response (EDR)}: Adds endpoint visibility, enabling detection of threats like malware and lateral movement.
+    \item \textbf{Intrusion Detection and Prevention Systems (IDS/IPS)}: Detect and block unauthorized access or malicious traffic, providing real-time notifications and contextual data.
+    \item \textbf{Vulnerability Assessment (VA) tools}: Scan networks for vulnerabilities, correlating them with threat data to prioritize remediation based on risk automatically.
+    \item \textbf{Threat Intelligence Platforms}: Enrich alerts with external data (e.g., IoCs) to provide actionable insights and support proactive defenses.
+\end{itemize}
 
 \subsection{Machine Learning}
 
 \subsection{Classification Models}
+
+\section{Automatic Classification of Security Alerts in SOC}
 
 \section{Technologies}
 
@@ -111,8 +196,6 @@ The repetitive nature of triage work, coupled with the need to escalate unresolv
 \subsection{Jira}
 
 \subsection{Machine Learning Classification Models}
-
-\section{Automatic Classification of Security Alerts in SOC}
 
 
 
