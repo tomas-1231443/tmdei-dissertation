@@ -1,19 +1,118 @@
 % Chapter 2
-\chapter{Literature Review}
+\chapter{State of the Art}
 \label{chap:Chapter2}
 
-\section{Security Operations Center} 
+This chapter is divided into three parts. 
+Part I starts on the theoretical side by introducing machine learning, Security Operation Centers, Security Information and Event Managers and advanced threat detection and response mechanisms such as IPS, IDS and EDR. 
+It also explains how popular ML classification models work and how to evaluate them. 
+Understanding these topics is the groundwork for material considered later in the chapter.
 
-\subsection{Triage}
+The second part focuses on current works on the automatic classification of security alert tickets. 
+It starts with general information about these systems and then reviews several publicly available datasets. 
+Finally, the chapter ends with a detailed assessment of existing systems similar to the one presented in this thesis.
+We have separated this analysis from the overview to explore their methods further.
 
-\section{SIEM}
+The third and final part discusses existing technologies that Security Operations Centers (SOCs) may utilize. 
+These technologies are designed to support the workflow outlined in the first section about SOCs. 
+At least three different technologies will be presented and discussed for each aspect of the SOC workflow. 
+The section will conclude with a summary of the key differences among the technologies and, if relevant, evaluate which one may be superior.
 
-\section{QRadar}
+\section{Theoretical Introduction}
 
-\section{Jira}
+Before diving into the technologies, tools, and methodologies used for automating the classification of security alert tickets, it is essential to understand some fundamental concepts first. 
+These concepts include Security Operations Centers (SOC), Security Information and Event Management (SIEM) systems, artificial intelligence—particularly machine learning—and advanced threat detection and response mechanisms. 
+Such a foundation is indispensable for comprehending these systems' functions, construction work, advantages and limitations, and the actual performance comparison among different methods. 
+The chapter introduces SOC and how it functions, then moves on to the foundations of machine learning and provides an overview of models frequently used for classification problems. 
+It also provides an overview of the methods for assessing classification model performance to set this in context for how these are used within the project.
 
-\section{Machine Learning}
+\subsection{Security Operations Center} 
 
-\subsection{CNN}
+The complexity and frequency of cyber threats are increasing \parencite{Arianna2024}, which has led to the emergence of the \gls{SOC} as a critical component of modern IT enterprises. 
+\gls{SOC}s are the primary defenders in incident response planning, vulnerability management, and regulatory compliance. 
+In today's interconnected world, integrating security operations to reduce defensive barriers allows organizations to optimize resources, enhance security posture, and safeguard critical assets.
+
+A \gls{SOC} is a unit \parencite{Rutledge2024} that provides tailored and centralized \gls{CND} \parencite{Zimmerman2014}. 
+It defends computer networks against the growing world of cyber threats. 
+The main objective of a \gls{SOC} is to ensure continuous monitoring and incident response for enterprise systems \parencite{Zimmerman2014}. 
+This primarily focuses on preventing unauthorized access, cyber-attacks, and data breaches.
+
+This 24/7 facility leverages advanced technologies and skilled information security professionals to monitor the network continuously \parencite{Zimmerman2014}. 
+With sophisticated tools to detect anomalies, the \gls{SOC} can address threats before they escalate.
+
+\subsubsection{Definition and Characteristics of a SOC}
+\textcite{Zimmerman2014} defined a \gls{SOC} as:
+\begin{quote}
+    ``A team primarily composed of security analysts organized to detect, analyze, respond to, report on, and prevent cybersecurity incidents.''
+\end{quote}
+
+This definition integrates elements from various sources, including the historical definition of \gls{CSIRT} as detailed in references \parencite{Shirey2007} and \parencite{Brownlee1998}. 
+
+For an organization to qualify as a \gls{SOC}, it must:
+\begin{enumerate}
+    \item Establish a system for constituents to report cybersecurity incidents.
+    \item Provide comprehensive support for managing and resolving incidents effectively.
+    \item Convey incident-related information to internal and external stakeholders.
+\end{enumerate}
+
+\subsubsection{Key Responsibilities of a SOC}
+A \gls{SOC} has several critical missions, as outlined by various sources \parencite{Muniz2015, Zimmerman2014}:
+\begin{itemize}
+    \item Preventing cybersecurity incidents by implementing proactive measures such as vulnerability scanning and threat analysis.
+    \item Monitor, detect, and analyze potential security intrusions.
+    \item Handle confirmed incidents and coordinate resources for effective countermeasures.
+    \item Providing stakeholders with situational awareness regarding cybersecurity incidents, trends, and threats.
+\end{itemize}
+
+\subsubsection{Tiers of Operation}
+Analysts within a \gls{SOC} operate in tiers. 
+Tier 1 analysts monitor and conduct initial investigations, escalating complex cases to Tier 2 analysts, who perform in-depth analyses and take further actions like blocking activities or deactivating accounts. Generally, higher-tier analysts handle more complex incidents, which require more time to resolve.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{ch2/assets/tierTable.png}
+    \caption{SOC analyst tier responsibilities.}
+    \label{fig:soc-tier}
+\end{figure}
+
+Extra levels may exist that handle responsibilities like threat hunting, vulnerability assessments, and penetration testing. 
+These levels are collectively termed Tier 3+. 
+Figure~\ref{fig:soc-tier} was taken from a paper on a qualitative study on a \gls{SOC} \parencite{Kokulu2019} and illustrates a visual representation of these tiers and their associated tasks. 
+Not all \gls{SOC}s follow a hierarchical model. 
+In some collaborative frameworks, team members may possess comparable skill sets, enabling them to manage incidents independently.
+
+\subsubsection{Triage Specialist}
+
+Since this project focuses on automating the triage process, it is crucial to gain a detailed understanding of the role of a triage specialist, their functions, and the drawbacks of automated triage in comparison.
+
+Tier 1 analysts, also known as triage specialists, play a critical role in the initial stages of a Security Operations Center (SOC) workflow \parencite{Vielberth2020}. Their primary responsibilities include:
+
+\begin{enumerate}
+    \item Collecting and analyzing raw data.
+    \item Reviewing alarms and alerts generated by monitoring systems.
+    \item Determining the validity and criticality of each alert.
+\end{enumerate}
+
+They must improve alerts with additional contextual information and decide whether an alert represents a real threat or a false positive \parencite{Hamornik2018, Sundaramurthy2014}. This process demands meticulous attention to detail, as the triage specialist must assess individual alerts, notify potential high-risk events, and prioritize them according to their severity. 
+
+The repetitive nature of triage work, coupled with the need to escalate unresolved issues to Tier 2 analysts, can result in mental fatigue and burnout \parencite{Tines2023}. This exhaustion affects individual performance and can compromise the overall efficiency of the SOC, as delayed or missed alerts may result in critical threats going undetected \parencite{CriticalStart2019}.
+
+\subsection{Advanced Threat Detection and Response Mechanisms}
+
+\subsection{SIEM}
+
+\subsection{Machine Learning}
+
+\subsection{Classification Models}
+
+\section{Technologies}
+
+\subsection{QRadar}
+
+\subsection{Jira}
+
+\subsection{Machine Learning Classification Models}
+
+\section{Automatic Classification of Security Alerts in SOC}
+
 
 
