@@ -148,16 +148,16 @@ Data sources provide the raw material for analysis and threat detection \parenci
     \item \textbf{Applications}: Web servers, databases, and cloud platforms.
 \end{itemize}
 
-A diverse set of data sources is crucial to ensure comprehensive monitoring and the ability to detect a wide range of threats.
 
-The variety of data sources is crucial for effective monitoring and threat detection. 
+A variety of data sources is crucial for effective monitoring and threat detection. 
+
 \textbf{Data collection} is a vital step with two main approaches to consider:
 \begin{itemize}
     \item \textbf{Agent-based collection}: Agent-based collection uses proxy agents on endpoint devices for better control and flexibility in log collection, but it is costly and complex to manage.
     \item \textbf{Agent-less collection}: Agent-less collection allows devices to send data directly to the SIEM, simplifying deployment but may reduce efficiency in high-volume data environments.
 \end{itemize}
 
-The \textbf{SIEM processing engine} is one of the critical components of any such system responsible for:
+The \textbf{SIEM processing engine} is one of the critical components \parencite{Sheeraz2023} responsible for:
 \begin{itemize}
     \item \textbf{Parsing}: The conversion of raw log data into a structured format used for analysis.
     \item \textbf{Normalization}: Ensure the log formats are standardized to facilitate easier comparisons.
@@ -174,7 +174,12 @@ These features not only improve user experience but also aid in making data acti
 Organizations can use these tools to conduct incident investigations, identify patterns occurring over time, and monitor compliance \parencite{Sheeraz2023}. 
 This comprehensive approach enables the development of scalable systems that can effectively handle increasing data demands.
 
-
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{ch2/assets/FinalGraph.png}
+    \caption{High-level SIEM Architecture}
+    \label{fig:siem-arc}
+\end{figure}
 
 \subsection{Machine Learning}
 
