@@ -174,12 +174,22 @@ These features not only improve user experience but also aid in making data acti
 Organizations can use these tools to conduct incident investigations, identify patterns occurring over time, and monitor compliance \parencite{Sheeraz2023}. 
 This comprehensive approach enables the development of scalable systems that can effectively handle increasing data demands.
 
+\clearpage
+
 \begin{figure}[ht]
     \centering
     \includegraphics[width=\textwidth]{ch2/assets/FinalGraph.png}
-    \caption{High-level SIEM Architecture}
+    \caption{SIEM Architecture}
     \label{fig:siem-arc}
 \end{figure}
+
+Figure~\ref{fig:siem-arc} illustrates the architecture of a \gls{SIEM} system, highlighting its critical components and their interactions. 
+Data flows from network and endpoint devices, as well as applications, to the log collection module. 
+The \gls{SIEM} processing engine then parses, normalizes, and correlates this data for real-time security alert analysis, event monitoring, and threat detection.
+
+The diagram also emphasizes the importance of visualization and reporting tools for turning data into actionable insights.
+
+The graphic illustrates how these elements integrate into a SIEM.
 
 \subsection{Machine Learning}
 
