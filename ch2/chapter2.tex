@@ -47,7 +47,7 @@ With sophisticated tools to detect anomalies, a \gls{SOC} can address threats be
 
 This definition integrates elements from various sources, including the historical definition of \gls{CSIRT} as detailed in references \parencite{Shirey2007} and \parencite{Brownlee1998}. 
 
-For an organization to qualify as a \gls{SOC}, it must:
+For an organization to qualify as a \gls{SOC}, according to \textcite{Zimmerman2014}, it must:
 \begin{enumerate}
     \item Establish a system for constituents to report cybersecurity incidents.
     \item Provide comprehensive support for managing and resolving incidents effectively.
@@ -64,14 +64,14 @@ A \gls{SOC} has several critical missions, as outlined by various sources \paren
 \end{itemize}
 
 \subsubsection{Tiers of Operation}
-Analysts within a \gls{SOC} operate in tiers. 
+Analysts within a \gls{SOC} operate in tiers \parencite{Vielberth2020}. 
 Tier 1 analysts monitor and conduct initial investigations, escalating complex cases to Tier 2 analysts, who perform in-depth analyses and take further actions like blocking activities or deactivating accounts. 
 Generally, higher-tier analysts handle more complex incidents, which require more time to resolve.
 
 \begin{figure}[ht]
     \centering
     \includegraphics[width=\textwidth]{ch2/assets/tierTable.png}
-    \caption{SOC analyst tier responsibilities.}
+    \caption{SOC Analyst Tier Responsibilities, from \autocite{Kokulu2019}.}
     \label{fig:soc-tier}
 \end{figure}
 
@@ -105,7 +105,7 @@ This study demonstrates that effectively structured and implemented automation c
 \subsection{Security Information and Event Management}
 
 The increasing complexity of cybersecurity threats has compelled organizations to implement advanced technologies to protect their digital assets. 
-\gls{SIEM} systems have emerged as vital tools in this context.
+\gls{SIEM} systems have emerged as vital tools in this context \parencite{Shaw2022}.
 
 \gls{SIEM} systems gather and centralize security-related data to detect threats and respond to incidents effectively. 
 These systems connect logs from various sources to support security analytics, enabling real-time monitoring and retrospective analysis of past events \parencite{Shaw2022}.
@@ -192,6 +192,24 @@ The diagram also emphasizes the importance of visualization and reporting tools 
 The graphic illustrates how these elements integrate into a SIEM.
 
 \subsection{Machine Learning}
+
+\gls{ML} is a core part of \gls{AI} but also overlaps with data mining, statistics, probability, and mathematics. 
+Unlike traditional rule-based systems that rely on predefined logic, \gls{ML} uses induction—it learns patterns from past data and forms assumptions that can be generalized to new cases. 
+This method relies on datasets, which are groups of examples the \gls{ML} algorithm analyzes to find patterns \parencite{Mohri2012}. 
+The goal is to use these learned patterns to predict or describe new data.
+
+However, \gls{ML} has its limitations. 
+Since datasets are finite, no algorithm can predict every scenario, which highlights an essential aspect of inductive reasoning: it can suggest likely outcomes but cannot ensure certainty \parencite{Mohri2012}. 
+
+In \gls{ML}, achieving an optimal model involves balancing between two critical concepts: \textbf{bias} and \textbf{variance}. 
+Bias refers to the error introduced when a model is excessively simplistic, which can lead to underfitting. 
+Underfitting occurs when the model fails to capture the underlying patterns of the data, resulting in poor performance on both training and unseen datasets \parencite{ElSahly2023}. 
+On the other hand, variance arises when a model becomes overly complex and sensitive to the fluctuations in the training data, culminating in overfitting. 
+Overfitting means the model performs exceptionally well on the training dataset but poorly on new, unseen data because it has memorized the noise instead of learning the actual signal \parencite{ElSahly2023}. 
+
+The primary objective in constructing a machine learning model is to identify the appropriate level of complexity that strikes the right balance, ensuring the model generalizes well and performs effectively on new data.
+
+Despite these challenges, \gls{ML} continues to evolve, with increasingly sophisticated algorithms enabling breakthroughs in many fields. 
 
 \subsection{Classification Models}
 
