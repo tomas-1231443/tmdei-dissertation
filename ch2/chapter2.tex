@@ -148,7 +148,6 @@ Data sources provide the raw material for analysis and threat detection \parenci
     \item \textbf{Applications}: Web servers, databases, and cloud platforms.
 \end{itemize}
 
-
 A variety of data sources is crucial for effective monitoring and threat detection. 
 
 \textbf{Data collection} is a vital step with two main approaches to consider:
@@ -193,13 +192,39 @@ The graphic illustrates how these elements integrate into a SIEM.
 
 \subsection{Machine Learning}
 
-\gls{ML} is a core part of \gls{AI} but also overlaps with data mining, statistics, probability, and mathematics. 
-Unlike traditional rule-based systems that rely on predefined logic, \gls{ML} uses induction—it learns patterns from past data and forms assumptions that can be generalized to new cases. 
-This method relies on datasets, which are groups of examples the \gls{ML} algorithm analyzes to find patterns \parencite{Mohri2012}. 
+\gls{ML} is a core part of \gls{AI} but also overlaps with data mining, statistics, probability, and mathematics \parencite{Mohri2012}. 
+Unlike traditional rule-based systems that rely on predefined logic, \gls{ML} uses induction—it learns patterns from past data and forms assumptions that can be generalized to new cases \parencite{Ali2024}. 
+This method relies on datasets, which are groups of examples the \gls{ML} algorithm analyzes to find patterns \parencite{Mohri2012, Suthaharan2016}. 
 The goal is to use these learned patterns to predict or describe new data.
 
+There are three primary types of techniques employed in machine learning, \parencite{Mohri2012}:
+
+\begin{enumerate}
+    \item \textbf{Reinforcement Learning}: 
+    This is a subset of machine learning in which an agent learns by interacting with the environment \parencite{Moradi2023}. It observes the environment, selects an action, and receives a reward if the action is beneficial or a penalty if it is detrimental. Over time, it refines its approach to achieve maximum rewards.
+
+    \item \textbf{Supervised Learning}: 
+    In this type of machine learning, models are trained on labeled data, meaning that each example includes input features and the corresponding expected output (or label). The model learns to map the inputs to the outputs, enabling it to predict the output for new, unseen data.
+
+    \item \textbf{Unsupervised Learning}: 
+    Unsupervised learning analyzes unlabeled data to reveal patterns without predefined labels. Unlike supervised learning, it allows algorithms to explore data independently. It is often used for clustering similar data points or modeling probability distributions. This approach is valuable for understanding the inherent organization in data without prior knowledge.
+\end{enumerate}
+
+Supervised learning can be further categorized into several types, \parencite{Mohri2012}:
+
+\begin{itemize}
+    \item \textbf{Regression}: 
+    Regression algorithms predict numerical values within a continuous range by analyzing input data to identify patterns. They can forecast future values, such as calculating the next number in a sequence based on previous numbers and trends. Techniques like linear regression, polynomial regression, and others enable these algorithms to draw conclusions and make predictions effectively.
+    
+    \item \textbf{Similarity}: 
+    Similarity algorithms analyze and compare two distinct instances to measure their resemblance. They are vital in recommender systems for suggesting products based on user preferences and in visual identity tracking and verification by comparing images or features. Their versatility makes them essential in data analysis, security, and personalized user experiences.
+    
+    \item \textbf{Classification}: 
+    Classification algorithms classify the input data into predefined groups. Classification tasks can be binary when there are only two possible categories (such as a yes-no decision) or multiclass when the number of categories exceeds two, such as recognizing handwritten letters in the alphabet.
+\end{itemize}
+
 However, \gls{ML} has its limitations. 
-Since datasets are finite, no algorithm can predict every scenario, which highlights an essential aspect of inductive reasoning: it can suggest likely outcomes but cannot ensure certainty \parencite{Mohri2012}. 
+Since datasets are finite, no algorithm can predict every scenario, which highlights an essential aspect of inductive reasoning: it can suggest likely outcomes but cannot ensure certainty \parencite{Mohri2012, Suthaharan2016}. 
 
 In \gls{ML}, achieving an optimal model involves balancing between two critical concepts: \textbf{bias} and \textbf{variance}. 
 Bias refers to the error introduced when a model is excessively simplistic, which can lead to underfitting. 
@@ -207,11 +232,76 @@ Underfitting occurs when the model fails to capture the underlying patterns of t
 On the other hand, variance arises when a model becomes overly complex and sensitive to the fluctuations in the training data, culminating in overfitting. 
 Overfitting means the model performs exceptionally well on the training dataset but poorly on new, unseen data because it has memorized the noise instead of learning the actual signal \parencite{ElSahly2023}. 
 
-The primary objective in constructing a machine learning model is to identify the appropriate level of complexity that strikes the right balance, ensuring the model generalizes well and performs effectively on new data.
+The primary objective in constructing a machine learning model is to identify the appropriate level of complexity with the right balance, ensuring the model generalizes well and performs effectively on new data \parencite{Suthaharan2016}.
 
-Despite these challenges, \gls{ML} continues to evolve, with increasingly sophisticated algorithms enabling breakthroughs in many fields. 
+Despite these challenges, \gls{ML} continues to evolve, with increasingly sophisticated algorithms enabling breakthroughs in many fields \parencite{Mohri2012}. 
 
-\subsection{Classification Models}
+\subsection{Machine Learning Models}
+
+The processes and computations of training a machine learning model are structured within a framework. 
+This chapter will briefly overview the most frequently used algorithms relevant to this project's goals.
+
+\subsubsection{Decision Trees}
+
+Decision Trees (DTs) are a fundamental supervised machine learning algorithm for classification and regression tasks \parencite{Huang2024}. 
+They work by splitting data into subsets based on the value of input features, forming a tree-like structure composed of nodes and branches.
+
+The process begins at the root node, representing the entire dataset, and iteratively divides the data into homogeneous subsets using decision nodes until a terminal leaf node is reached, representing the output prediction or class \parencite{Chauhan2022}, as seen in Figure~\ref{fig:struc-DT}.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth]{ch2/assets/FinalTreeGraph.png}
+    \caption{A basic structure of a Decision Tree, based on \parencite{Chauhan2022}}
+    \label{fig:struc-DT}
+\end{figure}
+
+The algorithm operates by evaluating all potential splits and selecting the one that optimizes a specific criterion, such as information gain or Gini impurity. 
+Information gain measures the reduction in entropy after a split, while Gini impurity quantifies the likelihood of misclassification at a node. 
+
+The entropy of \( S \) is defined as:
+\[
+H(S) = \sum_{i=1}^{n} -P(s_i) \times \log_b P(s_i)
+\]
+where \( S \) is a set of values \( s_1, s_2, \dots, s_n \), \( P(s_i) \) is the probability of observing a certain value, and \( b \) is the logarithm base, most commonly \( 2 \), \( e \), or \( 10 \).
+
+Using entropy, the \textbf{information gain (IG)} for a node \( t \) and a candidate split \( x \) is calculated as:
+\[
+IG(t, x) = H(t) - H(x, t)
+\]
+In contrast, the \textbf{Gini index}, another commonly used metric for evaluating splits, is defined as:
+\[
+\text{Gini} = 1 - \sum_{i=1}^{n} P(s_i).
+\]
+
+At each decision node, the algorithm tests a single feature and branches according to its value, guiding data instances down the tree until they reach a leaf node \parencite{Chauhan2022}. 
+During training, the algorithm continues splitting until a stopping criterion is met, such as achieving a maximum tree depth, minimum node size, or no further improvement in the splitting metric \parencite{Chauhan2022}.
+
+Pruning techniques prevent overfitting, which occurs when a tree becomes too complex and overly specific to the training data. 
+These involve removing unnecessary branches or nodes to simplify the tree while maintaining predictive accuracy. 
+Pruning can be preemptive (stopping tree growth early) or post hoc (removing branches after the tree is fully grown). 
+This ensures that the decision tree generalizes well to unseen data \parencite{Huang2024}.
+
+Decision trees are non-parametric, meaning they do not assume any specific distribution for the data, and they can capture both linear and non-linear relationships \parencite{Huang2024}. 
+However, they are sensitive to slight variations in the dataset \parencite{Huang2024}, which may cause significant changes in the tree structure. 
+Despite this, they remain popular for their simplicity, interpretability, and ability to handle numerical and categorical data \parencite{Chauhan2022}.
+
+\subsubsection{Support Vector Machines}
+
+\subsubsection{k-Nearest Neighbors}
+
+\subsubsection{Ensemble classifiers} % This aggregates multiple models to reduce overfitting.
+
+\subsubsection{Random Forests}
+
+\subsubsection{Deep Q-Network}
+
+\subsubsection{ZeroR and OneR}
+
+\subsubsection{Naive Bayes}
+
+\subsubsection{XGBoost}
+
+\subsubsection{J48}
 
 \section{Automatic Classification of Security Alerts in SOC}
 
@@ -220,8 +310,3 @@ Despite these challenges, \gls{ML} continues to evolve, with increasingly sophis
 \subsection{QRadar}
 
 \subsection{Jira}
-
-\subsection{Machine Learning Classification Models}
-
-
-
