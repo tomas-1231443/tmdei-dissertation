@@ -285,25 +285,240 @@ Decision trees are non-parametric, meaning they do not assume any specific distr
 However, they are sensitive to slight variations in the dataset \parencite{Huang2024}, which may cause significant changes in the tree structure. 
 Despite this, they remain popular for their simplicity, interpretability, and ability to handle numerical and categorical data \parencite{Chauhan2022}.
 
-\subsubsection{Support Vector Machines}
+\subsubsection{Ensemble classifiers}
 
-\subsubsection{k-Nearest Neighbors}
+Ensemble learning is a powerful machine learning technique that combines the predictions of multiple base models to achieve superior performance compared to individual learners \parencite{Joseph2022}.
 
-\subsubsection{Ensemble classifiers} % This aggregates multiple models to reduce overfitting.
+The fundamental idea is to address the limitations of single models, such as high variance, high bias, or low accuracy, by leveraging the diversity and complementary strengths of multiple models \parencite{Mienye2022, Dasarathy1979, Hansen1990}.
+
+The concept of ensemble learning has evolved significantly since its inception. Early work by \textcite{Dasarathy1979} introduced the partitioning of feature spaces using multiple classifiers. 
+Later, \textcite{Hansen1990} demonstrated that ensembles of artificial neural networks achieved superior predictive performance compared to single networks. 
+\textcite{Schapire1990} groundbreaking work laid the foundation for boosting, one of the primary techniques in ensemble learning.
+
+Ensemble learning methods are evaluated on two main principles: \textbf{accuracy} and \textbf{diversity} of the base learners \parencite{Hansen1990, Mienye2022}.
+
+\begin{itemize}
+    \item \textbf{Accuracy}: Each base learner should perform better than random guessing on the given task \parencite{Li2012}.
+    \item \textbf{Diversity}: The errors made by individual learners should be uncorrelated, which can be achieved through techniques like subsampling, feature randomization, or algorithmic diversity \parencite{Schapire1990, Breiman1996}.
+\end{itemize}
+
+A model is accurate if it generalizes well on unseen instances, while diversity ensures that the errors of individual base models are not correlated. 
+Achieving this balance is crucial for effective ensembles.
+
+Ensemble Classifiers offer several advantages over single models, making them a popular choice in diverse applications of machine learning:
+\begin{itemize}
+    \item \textbf{Improved Generalization}: Ensembles reduce overfitting and improve generalization by aggregating the predictions of multiple learners \parencite{Hansen1990}.
+    \item \textbf{Bias-Variance Trade-off}: Techniques like bagging reduce variance while boosting minimizes bias, addressing the critical limitations of individual learners \parencite{Li2012, Mienye2022}.
+    \item \textbf{Adaptability}: Ensembles can be designed to work with homogeneous (same algorithm) or heterogeneous (different algorithms) base learners, making them versatile across domains \parencite{Mienye2022}.
+\end{itemize}
+
+Ensemble learning methods are broadly categorized into:
+\begin{itemize}
+    \item \textbf{Parallel Ensembles}: Base learners are trained independently on different subsets of data or features. Techniques like bagging and Random Forests fall into this category \parencite{Breiman1996}.
+    \item \textbf{Sequential Ensembles}: Models are trained iteratively, with each learner focusing on correcting the errors of its predecessor. Boosting is the most prominent example of this approach \parencite{Schapire1990}.
+    \item \textbf{Stacked Ensembles}: Predictions from multiple base models are combined using a meta-model trained on the outputs of the base learners \parencite{Mienye2022}.
+\end{itemize}
+
+\begin{figure}[b!]
+    \centering
+    \includegraphics[width=\textwidth]{ch2/assets/Block_diagram_of_parallel_ensemble_learning.png}
+    \caption{Diagram of Parallel Ensemble Learning from \parencite{Mienye2022}}
+    \label{fig:parallel_emsemble}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[t!]
+    \centering
+    \includegraphics[width=\textwidth]{ch2/assets/Block_diagram_of_sequential_ensemble_learning.png}
+    \caption{Diagram of Sequential Ensemble Learning. from \parencite{Mienye2022}}
+    \label{fig:sequential_emsemble}
+\end{figure}
+
+Ensemble methods can then be categorized into three main approaches based on how they train and combine base models: \textbf{Bagging}, \textbf{Boosting}, and \textbf{Stacking}. 
+Each method has a distinct mechanism for generating diversity and aggregating predictions, addressing the specific limitations of single models.
+
+\paragraph{Bagging}
+Bagging, which stands for bootstrap aggregating, is a parallel ensemble technique where multiple base models are independently trained on random subsets of the training data, referred to as bootstrapped samples. 
+The final predictions are made by aggregating the outputs of these models, often using majority voting or averaging. 
+Random Forests are a well-known implementation of bagging, recognized for their ability to reduce variance without increasing bias \parencite{Mienye2022}.
+
+\paragraph{Boosting}
+Boosting is a sequential ensemble method that aims to reduce bias by iteratively training base models. 
+Each subsequent model focuses on correcting the errors made by the previous one, assigning higher weights to misclassified samples. 
+Algorithms such as AdaBoost and Gradient Boosting exemplify this approach, often achieving superior performance on complex datasets, but this can lead to increased susceptibility to overfitting \parencite{Mienye2022}.
+
+\paragraph{Stacking}
+Stacking integrates predictions from multiple base models using a meta-model that learns the optimal way to combine their outputs. 
+Unlike bagging and boosting, stacking allows for heterogeneous base learners, providing greater flexibility and diversity. 
+The meta-model is typically trained on the predictions made by the base models, enabling it to make more accurate decisions \parencite{Mienye2022}.
 
 \subsubsection{Random Forests}
 
-\subsubsection{Deep Q-Network}
+Random Forests represent a significant advancement in machine learning, particularly in the domain of ensemble classifiers \parencite{Ali2024}. 
 
-\subsubsection{ZeroR and OneR}
+As a bagging-based ensemble method, Random Forests combine multiple decision trees to improve classification accuracy and robustness. 
+This approach leverages the strengths of individual trees while mitigating their limitations, such as overfitting, by aggregating their predictions \parencite{Ali2024}. 
+
+The Random Forest algorithm begins by generating multiple decision trees, each trained on a random subset of the training data through bootstrapping\footnote{Bootstrapping is a resampling technique where random samples are drawn with replacement from the dataset.}.
+Additionally, features are randomly sampled at each split to ensure diversity among the trees, a process that reduces the correlation between individual tree predictions \parencite{Farooq2018}. 
+Once trained, the predictions of all trees are aggregated, typically through majority voting for classification tasks or averaging for regression tasks, to produce the final output \parencite{Nila2020}. 
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=\textwidth]{ch2/assets/Workflow-of-the-random-forest-algorithm.ppm.png}
+    \caption{Workflow of Random Forests: Bootstrapping, Decision Trees, and Aggregated Predictions from \parencite{Yang2019}}
+    \label{fig:random_forest_algorithm}
+\end{figure}
+
+Random Forests are highly valued for their versatility and robustness. 
+They perform exceptionally well with large and high-dimensional datasets, effectively handling numerical and categorical data. 
+Furthermore, their inherent ability to measure feature importance makes them interpretable, a critical requirement in security domains where trust and explanation are essential \parencite{Ali2024}. 
+
+Random Forests also excel at reducing overfitting, a common issue with individual decision trees. 
+By averaging the predictions of multiple trees, the model achieves better generalization, even when faced with noisy data \parencite{Sopan2019}. 
+
+Random Forests have been widely adopted in cybersecurity applications, particularly for detecting anomalies, classifying alerts, and predicting the likelihood of malicious behavior. 
+For example, they are effectively used in \gls{SIEM} systems to process large volumes of log data, identify patterns, and reduce false positives \parencite{Farooq2018, Ali2024}. 
+
+Studies have shown that Random Forest-based models can achieve high accuracy in detecting advanced persistent threats (APTs) and other cyberattacks by leveraging their ability to handle complex feature interactions and high-dimensional data \parencite{Ali2024}. 
+For instance, combining Random Forests with additional modules for feature selection and preprocessing has improved detection rates and reduced manual intervention in incident response workflows \parencite{Nila2020}.
 
 \subsubsection{Naive Bayes}
 
-\subsubsection{XGBoost}
+The Naive Bayes algorithm is a probabilistic classifier based on Bayes' theorem, which assumes conditional independence among features given the class \parencite{Chandra2016}.
+This simplicity makes it computationally efficient and easy to implement. 
 
-\subsubsection{J48}
+Naive Bayes is particularly effective in scenarios where the assumption of feature independence is approximately attained, such as spam detection and document classification. 
+The model's reliance on this assumption allows it to scale effectively to high-dimensional datasets while remaining computationally efficient \parencite{Chandra2016}.
+
+Naive Bayes calculates the posterior probability of each class given the observed data using the formula:
+
+\[
+P(C|X) = \frac{P(X|C) \cdot P(C)}{P(X)}
+\]
+
+where:
+\begin{itemize}
+    \item \( P(C|X) \) is the posterior probability of class \( C \) given the feature vector \( X \),
+    \item \( P(X|C) \) is the likelihood of observing \( X \) given class \( C \),
+    \item \( P(C) \) is the prior probability of class \( C \),
+    \item \( P(X) \) is the probability of the feature vector \( X \).
+\end{itemize}
+
+In practice, the Naive Bayes model estimates the prior probability \( P(C) \) for each class and the conditional probability \( P(X_i|C) \) for each feature \( X_i \) given the class. 
+These probabilities are typically derived from the frequency of occurrences in the training data. 
+For continuous features, it is common to assume a Gaussian distribution and compute the likelihood accordingly. 
+The model assigns a new instance to the class with the highest posterior probability \( P(C|X) \) \parencite{Nila2020, Chandra2016}.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.5\textwidth]{ch2/assets/Flow-chart-for-Naive-Bayesian-classification.png}
+    \caption{Schematic Diagram of the Naive Bayes Classification Process from \parencite{Sneha2019}}
+    \label{fig:naive_bayes}
+\end{figure}
+
+This decision rule is computationally efficient, making Naive Bayes suitable for real-time prediction tasks \parencite{Nila2020, Chandra2016}. 
+
+However, the strong independence assumption may only hold in some scenarios, potentially leading to suboptimal performance when features are highly correlated. 
+Despite this limitation, Naive Bayes remains popular due to its simplicity and effectiveness in many practical applications \parencite{Chandra2016}.
 
 \section{Automatic Classification of Security Alerts in SOC}
+
+The growing complexity of cyber threats, especially \gls{APT}, has led to significant advancements in automated detection and mitigation mechanisms. 
+Many of these mechanisms utilize \gls{ML} techniques. 
+This section examines key works, focusing on their methodologies, limitations, and relevance to the problem of alert triage automation in \gls{SOC}.
+
+Recent research has explored hybrid approaches to anomaly detection. 
+\textcite{Saini2023} proposed a hybrid ensemble model combining Random Forest and XGBoost classifiers, achieving a 99.91\% accuracy on the CIC-IDS2017\footnote{Labeled dataset of network traffic, including normal behavior and various attacks, used to evaluate intrusion detection models.} dataset with a False Positive Rate (FPR) as low as 0.12\%. 
+Despite its high performance, the model relies on static datasets, which limits its adaptability to evolving attack patterns. 
+Similarly, \textcite{Ghafir2018} developed Machine Learning for Advanced Persistent Threats (MLAPT), a multi-phase system incorporating correlation frameworks for APT detection, achieving an accuracy of 84.8\%. 
+While this approach improved early-stage prediction, its accuracy was limited compared to ensemble methods and lacked scalability for dynamic environments.
+
+\textcite{Ali2024} extended APT datasets to include a diverse range of alerts. 
+They integrated Random Forest and XGBoost models into a SIEM environment, demonstrating the ability to reduce FPR and achieve a near-perfect 99.6\% accuracy. 
+However, the computational demands of such systems may hinder practical deployment in resource-constrained environments.
+On the contrary, \textcite{Brogi2016} utilized Information Flow Tracking (IFT) for APT detection, concentrating on the correlation between the various stages of an attack. 
+While this method excels at tracing complex multi-stage attacks, it requires further automation to support large-scale SOC operations effectively.
+
+Incorporating reinforcement learning, \textcite{Sethi2020} introduced a Deep Q-Network (DQN)-based context-adaptive intrusion detection system, which improved FPR and demonstrated robustness against several attacks. 
+Nevertheless, the distributed nature of their approach introduces practical deployment challenges, especially in SOC environments where centralized oversight is critical. 
+Similarly, \textcite{Nila2020} explored ML-based triage systems to automate alert classification and reduce false positives. 
+Their work effectively alleviated analyst fatigue by prioritizing actionable alerts, yet the scope of implementation remains limited to isolated systems.
+
+\textcite{Chandra2016} conducted a comprehensive study on email-based APT entry points, explicitly exploring the effectiveness of Bayesian spam filters\footnote{Bayesian spam filters classify emails as spam or legitimate using probabilities based on Bayes theorem.}.
+These filters demonstrated a strong capability to identify and differentiate between spear-phishing attempts and general spam emails, which is crucial for enhancing cybersecurity measures. 
+However, the authors noted that while their solution provided significant benefits in detecting these specific types of email threats, it needed to address the broader range of APT life cycles.
+This limitation restricts its effectiveness in SOC environments with diverse attack vectors, requiring a more holistic approach to threat detection and response strategies to encompass the full spectrum of APT strategies and tactics.
+
+\captionsetup[table]{font=small} % Set the caption font size
+\scriptsize % Reduce the font size for the table content
+\begin{longtable}{@{}P{1.9cm}P{1.9cm}P{1.9cm}P{1.9cm}P{1.9cm}P{3cm}@{}}
+    \caption{Summary of the Existing Related Works based on \textcite{Ali2024}.} \\
+    \toprule
+    \textbf{References} & APT Life Cycle Coverage & AI Models Used & Lowest FPR & Highest Accuracy & Limitations \\
+    \midrule
+    \endfirsthead
+    \toprule
+    \textbf{References} & APT Life Cycle Coverage & AI Models Used & Lowest FPR & Highest Accuracy & Limitations \\
+    \midrule
+    \endhead
+    \bottomrule
+    \endfoot
+    \bottomrule
+    \endlastfoot
+    \textcite{Ghafir2018} & Complete & Decision Tree, SVM, KNN, Ensemble Classifier & 4.5\% & 84.8\% & The blacklist-based detection modules require continuous update. Moreover, the accuracy is lower. \\
+    \hline
+    \textcite{Brogi2016} & Complete & No ML model used & High & Not calculated & Information Flow Tracking is used to detect APTs; however, the FPR is high. \\
+    \hline
+    \textcite{Giura2012} & Complete & No ML model used & 27.88\% & Not calculated & Sufficient knowledge is required to set up the mechanism. \\
+    \hline
+    \textcite{Sopan2019} & No & Random Forest & Not calculated & 98.5\% & The post-alert decision is not automated; it involves the intervention of security experts. \\
+    \hline
+    \textcite{Farooq2018} & Partial & SVM, Random Forest & Not calculated & Not calculated & The process anomaly detection is presented formally using One-Class SVM. However, the paper lacks ML-based experimental results. \\
+    \hline
+    \textcite{Sethi2020} & No & Deep Q-network & 0.35\% & 96.12\% & The proposed model enables the detection of APTs. \\
+    \hline
+    \textcite{Nila2020} & No & ZeroR, OneR, NaiveBayes, SVM, J48, RandomForest & Not calculated & 95.5\% & The authors did not discuss the FPR of the proposed model. \\
+    \hline
+    \textcite{Chandra2016} & Partial & NaiveBayes & Not calculated & 87\% & The authors did not discuss the FPR of the proposed model. \\
+    \hline
+    \textcite{Saini2023} & Partial & Random Forest, XGBoost & 0.12\% & 99.91\% & This study used existing datasets, posing a challenge because these datasets might not contain the latest attack scenarios. \\
+    \hline
+    \textcite{Ali2024} & Complete & Random Forest, XGBoost & Not calculated\% & 99.6\% & High resource demand for training; dataset generated in controlled environments, limiting real-world adaptability. \\
+\end{longtable}
+
+\normalsize
+
+This study introduces a new approach to automating alert triage in SOCs by combining ML models with existing SIEM systems. 
+In contrast with the previous studies, this research will use live data as its training data and will be deployed in a real-world environment. 
+Therefore, analysts can focus on high-risk issues by analyzing the alerts based on the severity of the cyber threat shown by the ML model.
+
+While the related works reviewed in this study showcase significant advancements in SOC automation and alert triage, none closely reflects this research's objectives. 
+However, beyond academic research, commercially available solutions like Check Point's SOC automation tools demonstrate functionalities that align with aspects of this study. 
+These solutions offer valuable insights into the application of AI and automation in SOC environments, providing a practical point of comparison for the approach proposed in this research.
+
+Check Point's approach to SOC automation stands out for its focus on streamlining SOC operations using artificial intelligence (AI) and automation tools \parencite{checkpoint}.
+
+SOC automation, as described by Check Point, employs AI to take over repetitive and manual tasks in the SOC, such as alert triage, incident response, and threat detection. Their solution includes tools like:
+\begin{itemize}
+    \item \textbf{Generative AI:} Used to improve usability and streamline workflows, enabling analysts to query and interact with data using natural language.
+    \item \textbf{Playbooks:} Predefined and customizable workflows for incident response that enable rapid and consistent remediation.
+    \item \textbf{Threat Detection and Analytics:} Leveraging advanced analytics, behavioral insights, and proprietary threat intelligence from Check Point Research and ThreatCloud AI to identify threats and reduce false positives.
+    \item \textbf{Malware Analysis and Phishing Detection:} Using sandboxes and natural language processing (NLP) to analyze suspicious files and emails.
+    \item \textbf{Infinity Extended Prevention and Response (XDR/XPR):} A platform that integrates automated playbooks with real-time threat intelligence and analytics to correlate events across the security estate, detect sophisticated attacks, and prevent lateral movement.
+\end{itemize}
+
+The research in this study aligns closely with Check Point’s SOC automation approach. 
+Both aim to automate alert triage and streamline SOC operations using AI to enhance efficiency. 
+This study also shares key goals, such as reducing false positives, prioritizing alerts, and providing analysts with tools to focus on high-risk threats. 
+Like Check Point, this research emphasizes the use of playbooks for consistent responses and aims to alleviate the burden of repetitive tasks on analysts.
+
+While the Check Point solution is comprehensive and includes a full suite of tools, this research focuses on a customized solution tailored to the specific needs of the organization conducting this study differing in:
+\begin{enumerate}
+    \item \textbf{Integration with Existing Infrastructure:} This study develops a solution that seamlessly integrates with the organization's current SIEM system, avoiding the need for a complete overhaul of existing systems, as would be required to adopt Check Point’s platform.
+    \item \textbf{Live Data and Real-World Deployment:} Unlike Check Point’s reliance on proprietary threat intelligence and prebuilt systems, this research involves using live data collected within the organization's environment, ensuring the model is trained and deployed in a real-world context.
+\end{enumerate}
 
 \section{Technologies}
 
