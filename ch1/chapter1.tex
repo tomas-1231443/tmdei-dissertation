@@ -67,10 +67,133 @@ The objectives for this project are as follows:
     \end{itemize}
 \end{enumerate}
 
-
 \section{Research Contextualization}
 
+This research will be conducted at ArtResilia, a cybersecurity firm dedicated to improving organizational cyber resilience through proactive threat anticipation, strong security measures, and efficient recovery.
+As they emphasize: 
 
+\begin{quote}
+    "Everyone will be attacked someday, what matters is how fast they recover!"  
+\end{quote}
+
+This reflects their focus on minimizing the impact of cyber threats and enabling organizations to maintain operational continuity, artresilia2024.
+
+ArtResilia offers a broad range of cybersecurity services divided into three main areas:
+\begin{itemize}
+    \item \textbf{Defensive Security:} Design, implementation, and management of security solutions. Their state-of-the-art Security Operations Center (SOC), known as Helix, provides end-to-end security operations, including threat anticipation, detection, protection, and incident recovery.
+    \item \textbf{Offensive Security:} Comprehensive testing and validation of organizational assets by simulating real-world threat actor techniques, including penetration testing, threat intelligence, and deception-based strategies.
+    \item \textbf{Advisory Services:} Consulting services focused on governance, risk management, compliance (GRC), and security architecture to ensure organizations meet regulatory and operational security requirements.
+\end{itemize}
+
+ArtResilia was approached for a research project exploring strategies to enhance cybersecurity resilience through automation and machine learning. The project aligns with ArtResilia's mission to strengthen incident detection and response capabilities against emerging cyber threats.
+
+After reviewing the proposal, ArtResilia accepted the project and committed to providing support and resources for its implementation. This collaboration underscores ArtResilia's dedication to fostering cybersecurity innovation and ensuring real-world applications in professional security operations.
+
+\section{Research Questions}
+
+For this research, three key research questions (RQs) were devised to address the central issue of improving the efficiency and accuracy of security alert triage within Security Operations Centers (SOCs). 
+Each question offers a targeted perspective for examining specific facets of the problem, contributing to the overarching objective of minimizing both false positives and false negatives in security alerts. 
+Below are the RQs, along with a brief discussion of their significance.
+
+\begin{enumerate}
+    \item \textbf{How can ML techniques be applied to the triage of security alerts to reduce false positives and negatives?} \\
+    This question explores how machine learning (ML) can tackle the challenge of excessive alerts in SOCs, characterized by high false positive and negative rates. The goal is to identify effective ML techniques and assess their impact on improving alert accuracy.
+    
+    \item \textbf{What are the main challenges in implementing an AI bot integrated with SIEM systems, and how can they be mitigated?} \\
+    Implementing AI in security systems presents challenges like data integration, system compatibility, and performance maintenance under various conditions. This RQ aims to identify these challenges and suggest strategies for successful AI integration.
+    
+    \item \textbf{What ML frameworks and methodologies exist, and which are most suitable for developing and training AI models for ticket triage in SOC environments?} \\
+    Understanding ML frameworks and methodologies is essential for choosing the right tools for AI model development in SOC ticket triage. This question examines the suitability of different frameworks based on their capabilities and alignment with SOC needs.
+\end{enumerate}
+
+To answer these research questions systematically and comprehensively, a structured approach was adopted. 
+This approach involved defining keywords, utilizing relevant digital libraries, and employing robust frameworks for the literature review.
+
+The following keywords and their combinations were used to identify relevant papers:
+\begin{itemize}
+    \item \textbf{Keywords:} Machine learning, AI, security alerts, SOCs, SIEM systems
+    \item \textbf{Keywords:} False positives, false negatives, alert triage
+    \item \textbf{Keywords:} AI integration, ticket prioritization, frameworks, methodologies
+\end{itemize}
+
+The primary digital libraries used were:
+\begin{itemize}
+    \item \textbf{ACM Digital Library}: For accessing peer-reviewed articles on machine learning and security applications.
+    \item \textbf{ResearchGate}: For exploring academic discussions, preprints, and supplementary materials.
+\end{itemize}
+
+Search strings using these keywords were used to search the digital libraries effectively.
+\begin{itemize}
+    \item \textbf{Search String 1:} ("Machine learning" AND "security alerts") AND ("false positives" OR "false negatives")
+    \item \textbf{Search String 2:} ("AI integration" AND "SIEM systems") OR ("ticket prioritization")
+    \item \textbf{Search String 3:} ("Frameworks" AND "SOC environments") AND ("alert triage")
+\end{itemize}
+
+In addition to the search strings, a new constraint was implemented to limit the findings to the most recent five years, ensuring the collection of up-to-date research and information.
+
+To structure my literature review, I utilized two complementary frameworks: \textbf{PICOCS} and \textbf{snowballing}.
+
+\begin{itemize}
+    \item \textbf{PICOCS Framework}: This framework helped define the Population, Intervention, Comparison, Outcome, Context, and Study type for each RQ as can be seen on Figure~\ref{tab:picocs_rqs}. Using PICOCS ensured a focused and systematic approach to identifying papers aligned with this research objectives.
+
+\captionsetup[table]{font=small} % Set the caption font size
+\scriptsize % Reduce the font size for the table content
+\begin{longtable}{p{1cm}p{1.5cm}p{3cm}p{3cm}p{3cm}}
+    \caption{PICOCS Framework for Research Questions}
+    \label{tab:picocs_rqs} \\
+    \toprule
+    \textbf{Element} & \textbf{Definition} & \textbf{RQ1} & \textbf{RQ2} & \textbf{RQ3} \\
+    \midrule
+    \endfirsthead
+    \toprule
+    \textbf{Element} & \textbf{Definition} & \textbf{RQ1} & \textbf{RQ2} & \textbf{RQ3} \\
+    \midrule
+    \endhead
+    \bottomrule
+    \endfoot
+    \bottomrule
+    \endlastfoot
+    P & Population & SOC analysts dealing with alerts & SOC analysts and SIEM administrators & SOC analysts developing AI models \\
+    I & Intervention & Machine learning techniques & AI bots integrated with SIEM systems & ML frameworks and methodologies \\
+    C & Comparison & Manual triage methods & Existing rule-based systems & Alternative ML frameworks \\
+    O & Outcome & Reduction in false positives/negatives & Mitigation of integration challenges & Identification of suitable frameworks \\
+    C & Context & SOC environments & SOC environments using SIEM systems & SOC environments implementing AI models \\
+    S & Study Type & Empirical studies, experiments & Case studies, technical reports & Framework evaluations, experiments \\
+\end{longtable}
+
+\normalsize
+
+    \item \textbf{Snowballing Method}: Starting with an initial set of highly relevant papers, I used snowballing to identify additional studies by exploring their references (backward snowballing) and citations (forward snowballing). This iterative process expanded the breadth of my review.
+\end{itemize}
+    
+\paragraph{Combining PICOCS and Snowballing} The combination of PICOCS and snowballing provided a balance between structure and adaptability. 
+PICOCS ensured a methodical and targeted search, while snowballing allowed for iterative exploration beyond initial search results, capturing emerging trends and overlooked studies.
+
+By following this approach, it was possible to systematically answered the RQs and developed insights that directly contribute to improving the triage of security alerts in SOC environments.
+
+\section{Work Breakdown Structure}
+
+Figure~\ref{fig:wbs-image} represents a detailed WBS for this research.
+
+\clearpage
+
+\begin{figure}[htp]
+    \centering
+    \includegraphics[scale=0.18, angle=270]{ch1/assets/WBS.png}
+    \caption{Work Breakdown Structure}
+    \label{fig:wbs-image} 
+\end{figure}
+
+\clearpage
+
+% \begin{landscape}
+%     \begin{figure}[htp]
+%         \centering
+%         \includegraphics[width=\linewidth]{ch1/assets/WBS.png}
+%         \caption{Work Breakdown Structure}
+%         \label{fig:wbs-image}
+%     \end{figure}
+% \end{landscape}
 
 %-------------------------------------------------------------------------------
 \section{Dissertation Structure}

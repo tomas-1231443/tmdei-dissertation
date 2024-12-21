@@ -259,19 +259,19 @@ The algorithm operates by evaluating all potential splits and selecting the one 
 Information gain measures the reduction in entropy after a split, while Gini impurity quantifies the likelihood of misclassification at a node. 
 
 The entropy of \( S \) is defined as:
-\[
+\begin{equation}
 H(S) = \sum_{i=1}^{n} -P(s_i) \times \log_b P(s_i)
-\]
+\end{equation}
 where \( S \) is a set of values \( s_1, s_2, \dots, s_n \), \( P(s_i) \) is the probability of observing a certain value, and \( b \) is the logarithm base, most commonly \( 2 \), \( e \), or \( 10 \).
 
 Using entropy, the \textbf{information gain (IG)} for a node \( t \) and a candidate split \( x \) is calculated as:
-\[
+\begin{equation}
 IG(t, x) = H(t) - H(x, t)
-\]
+\end{equation}
 In contrast, the \textbf{Gini index}, another commonly used metric for evaluating splits, is defined as:
-\[
+\begin{equation}
 \text{Gini} = 1 - \sum_{i=1}^{n} P(s_i).
-\]
+\end{equation}
 
 At each decision node, the algorithm tests a single feature and branches according to its value, guiding data instances down the tree until they reach a leaf node \parencite{Chauhan2022}. 
 During training, the algorithm continues splitting until a stopping criterion is met, such as achieving a maximum tree depth, minimum node size, or no further improvement in the splitting metric \parencite{Chauhan2022}.
@@ -314,8 +314,8 @@ Ensemble Classifiers offer several advantages over single models, making them a 
 
 Ensemble learning methods are broadly categorized into:
 \begin{itemize}
-    \item \textbf{Parallel Ensembles}: Base learners are trained independently on different subsets of data or features. Techniques like bagging and Random Forests fall into this category \parencite{Breiman1996}.
-    \item \textbf{Sequential Ensembles}: Models are trained iteratively, with each learner focusing on correcting the errors of its predecessor. Boosting is the most prominent example of this approach \parencite{Schapire1990}.
+    \item \textbf{Parallel Ensembles}: Base learners are trained independently on different subsets of data or features. Techniques like bagging and Random Forests fall into this category \parencite{Breiman1996}. The illustration in Figure~\ref{fig:parallel_emsemble} demonstrates how parallel ensembles operate.
+    \item \textbf{Sequential Ensembles}: Models are trained iteratively, with each learner focusing on correcting the errors of its predecessor. Boosting is the most prominent example of this approach \parencite{Schapire1990}. The illustration in Figure~\ref{fig:sequential_emsemble} demonstrates how sequential ensembles operate.
     \item \textbf{Stacked Ensembles}: Predictions from multiple base models are combined using a meta-model trained on the outputs of the base learners \parencite{Mienye2022}.
 \end{itemize}
 
@@ -360,7 +360,7 @@ Random Forests represent a significant advancement in machine learning, particul
 As a bagging-based ensemble method, Random Forests combine multiple decision trees to improve classification accuracy and robustness. 
 This approach leverages the strengths of individual trees while mitigating their limitations, such as overfitting, by aggregating their predictions \parencite{Ali2024}. 
 
-The Random Forest algorithm begins by generating multiple decision trees, each trained on a random subset of the training data through bootstrapping\footnote{Bootstrapping is a resampling technique where random samples are drawn with replacement from the dataset.}.
+The Random Forest algorithm begins by generating multiple decision trees, as can be seen on Figure~\ref{fig:random_forest_algorithm}, each trained on a random subset of the training data through bootstrapping\footnote{Bootstrapping is a resampling technique where random samples are drawn with replacement from the dataset.}.
 Additionally, features are randomly sampled at each split to ensure diversity among the trees, a process that reduces the correlation between individual tree predictions \parencite{Farooq2018}. 
 Once trained, the predictions of all trees are aggregated, typically through majority voting for classification tasks or averaging for regression tasks, to produce the final output \parencite{Nila2020}. 
 
@@ -394,9 +394,9 @@ The model's reliance on this assumption allows it to scale effectively to high-d
 
 Naive Bayes calculates the posterior probability of each class given the observed data using the formula:
 
-\[
+\begin{equation}
 P(C|X) = \frac{P(X|C) \cdot P(C)}{P(X)}
-\]
+\end{equation}
 
 where:
 \begin{itemize}
@@ -406,7 +406,7 @@ where:
     \item \( P(X) \) is the probability of the feature vector \( X \).
 \end{itemize}
 
-In practice, the Naive Bayes model estimates the prior probability \( P(C) \) for each class and the conditional probability \( P(X_i|C) \) for each feature \( X_i \) given the class. 
+In practice, the Naive Bayes model, Figure~\ref{fig:naive_bayes}, estimates the prior probability \( P(C) \) for each class and the conditional probability \( P(X_i|C) \) for each feature \( X_i \) given the class. 
 These probabilities are typically derived from the frequency of occurrences in the training data. 
 For continuous features, it is common to assume a Gaussian distribution and compute the likelihood accordingly. 
 The model assigns a new instance to the class with the highest posterior probability \( P(C|X) \) \parencite{Nila2020, Chandra2016}.
@@ -451,10 +451,13 @@ These filters demonstrated a strong capability to identify and differentiate bet
 However, the authors noted that while their solution provided significant benefits in detecting these specific types of email threats, it needed to address the broader range of APT life cycles.
 This limitation restricts its effectiveness in SOC environments with diverse attack vectors, requiring a more holistic approach to threat detection and response strategies to encompass the full spectrum of APT strategies and tactics.
 
+Table~\ref{tab:related_work_table} presents a detailed summary of the relevant studies explored, highlighting their respective strengths, weaknesses, and potential areas for enhancement.
+
 \captionsetup[table]{font=small} % Set the caption font size
 \scriptsize % Reduce the font size for the table content
 \begin{longtable}{@{}P{1.9cm}P{1.9cm}P{1.9cm}P{1.9cm}P{1.9cm}P{3cm}@{}}
-    \caption{Summary of the Existing Related Works based on \textcite{Ali2024}.} \\
+    \caption{Summary of the Existing Related Works based on \textcite{Ali2024}.}
+    \label{tab:related_work_table} \\
     \toprule
     \textbf{References} & APT Life Cycle Coverage & AI Models Used & Lowest FPR & Highest Accuracy & Limitations \\
     \midrule
@@ -522,7 +525,15 @@ While the Check Point solution is comprehensive and includes a full suite of too
 
 \section{Technologies}
 
+The following section presents some of the important technologies available in the three categories discussed: SIEM Tools, Ticketing Tools, and Machine Learning Frameworks. 
+Each category serves a unique purpose in the automatic classification of security alerts in a SOC.
+The subsequent subsections provide an overview of the tools in each category, followed by a comparative analysis highlighting their strengths and trade-offs.
+
 \subsection{SIEM Tools}
+
+In this subsection, the three leading SIEM tools, QRadar, Splunk, and LogRhythm, were chosen for their advanced threat detection, log aggregation, and real-time security analytics. 
+Based on industry adoption, integration capabilities, and performance in SOC environments, each platform offers unique features for efficient incident detection and response.
+
 \subsubsection{QRadar}
 QRadar is an industry-leading \gls{SIEM} solution developed by IBM. 
 It provides advanced threat detection and automated response capabilities. 
@@ -538,6 +549,11 @@ LogRhythm is a comprehensive \gls{SIEM} solution focused on streamlining threat 
 With advanced analytics and machine learning integration, LogRhythm enables organizations to quickly identify and remediate security incidents while maintaining compliance.
 
 \subsection{Ticketing Tools}
+
+This subsection focuses on three essential ticketing tools: IBM QRadar SOAR, ServiceNow, and Zendesk. 
+These tools were selected for their capabilities in automating workflows, improving incident management, and integrating with \gls{SIEM} systems. 
+Practical ticketing tools are vital for efficiently managing security incidents, reducing response times, and promoting collaboration within \gls{SOC} teams.
+
 \subsubsection{IBM QRadar SOAR}
 IBM QRadar SOAR integrates seamlessly with QRadar SIEM to enhance incident management. 
 It offers playbook automation, case management, and collaboration tools, enabling analysts to streamline their workflows and improve response times.
@@ -551,6 +567,11 @@ Zendesk is a versatile ticketing and customer support tool that can be adapted f
 Its user-friendly interface and integration capabilities simplify the management and tracking of security alerts.
 
 \subsection{Machine Learning Frameworks}
+
+This section discusses three popular machine learning frameworks: Scikit-learn, TensorFlow, and PyTorch. 
+These frameworks effectively implement scalable machine learning models in research and production. 
+Machine learning enhances cybersecurity by automating alert triage and reducing false positives.
+
 \subsubsection{Scikit-learn}
 Scikit-learn is a Python-based machine learning library well-suited for implementing Random Forest and Naive Bayes algorithms. 
 It provides a wide range of tools for data preprocessing, model training, and evaluation.
@@ -564,19 +585,92 @@ PyTorch is another popular machine learning library offering dynamic computation
 Its ease of use and flexibility make it a strong choice for implementing complex machine learning models in cybersecurity applications.
 
 \subsection{Comparative Analysis}
+
+A comparative overview of all the discussed technologies will be presented here. This analysis highlights the strengths and limitations of the SIEM tools, ticketing tools, and machine learning frameworks identified in previous subsections.
+
 \subsubsection{SIEM Tools}
-QRadar stands out for its deep integration with IBM solutions, making it ideal for organizations already using IBM's ecosystem. 
-Splunk excels in real-time analytics and offers extensive third-party integrations, making it suitable for diverse use cases. 
-LogRhythm provides strong machine learning capabilities and focuses on compliance, but may lack the seamless integration offered by QRadar.
+
+\begin{longtable}{p{3cm}p{3cm}p{3cm}p{3cm}}
+    \caption{Comparative Analysis of SIEM Tools.}
+    \label{tab:siem_ca} \\
+    \toprule
+    \textbf{Feature} & \textbf{QRadar} & \textbf{Splunk} & \textbf{LogRhythm} \\
+    \midrule
+    \endfirsthead
+    \toprule
+    \textbf{Feature} & \textbf{QRadar} & \textbf{Splunk} & \textbf{LogRhythm} \\
+    \midrule
+    \endhead
+    \bottomrule
+    \endfoot
+    \bottomrule
+    \endlastfoot
+    Integration & Deep IBM ecosystem integration & Extensive third-party support & Moderate third-party support \\
+    Threat Detection & Advanced anomaly detection & Real-time search and analytics & Strong ML-based detection \\
+    Compliance & Strong compliance capabilities & Flexible for custom compliance & Focused on compliance workflows \\
+    Machine Learning & Limited native ML & Third-party ML integrations & Native ML capabilities \\
+    Ease of Use & Moderate & User-friendly UI & Moderate \\
+\end{longtable}
+
+As shown in Table~\ref{tab:siem_ca}, QRadar stands out due to its deep integration with IBM solutions, making it an excellent choice for organizations already utilizing IBM's ecosystem. 
+In contrast, Splunk offers powerful real-time analytics and extensive integration with third-party tools, which allows it to be adaptable for various use cases. 
+LogRhythm focuses on compliance and features native machine learning capabilities, although it may not provide the same level of seamless integration within IBM environments as QRadar does.
 
 \subsubsection{Ticketing Tools}
-IBM QRadar SOAR integrates tightly with QRadar, enabling efficient workflows for organizations using IBM products. 
-ServiceNow is highly customizable and supports broader IT service management, making it ideal for multi-department organizations. 
-Zendesk is user-friendly and cost-effective but may not offer the depth of automation provided by IBM QRadar SOAR.
+
+\begin{longtable}{@{}p{3cm}p{3cm}p{3cm}p{3cm}@{}}
+    \caption{Comparative Analysis of Ticketing Tools.}
+    \label{tab:tt_ca} \\
+    \toprule
+    \textbf{Feature} & \textbf{IBM QRadar SOAR} & \textbf{ServiceNow} & \textbf{Zendesk} \\
+    \midrule
+    \endfirsthead
+    \toprule
+    \textbf{Feature} & \textbf{IBM QRadar SOAR} & \textbf{ServiceNow} & \textbf{Zendesk} \\
+    \midrule
+    \endhead
+    \bottomrule
+    \endfoot
+    \bottomrule
+    \endlastfoot
+    Integration & Seamless with QRadar SIEM & Broad integrations across IT & Moderate integrations \\
+    Automation & Playbook-driven workflows & Customizable workflow automation & Limited automation capabilities \\
+    Incident Management & Case management and playbooks & Advanced IT service management & Simplified incident tracking \\
+    Ease of Use & Moderate & Customizable but complex & Highly user-friendly \\
+\end{longtable}
+
+Table~\ref{tab:tt_ca} outlines the strengths and weaknesses of various ticketing tools. I
+BM QRadar SOAR closely integrates with the QRadar SIEM platform, providing strong automation through playbooks and advanced incident management features. 
+ServiceNow is notable for its flexibility and capability to cater to multiple IT departments. 
+In contrast, Zendesk offers a more user-friendly and cost-effective solution with limited automation functionalities.
 
 \subsubsection{Machine Learning Frameworks}
-Scikit-learn is lightweight and highly effective for implementing algorithms like Random Forest and Naive Bayes, making it the best choice for projects focused on classical machine learning. 
-TensorFlow offers scalability and is better suited for deep learning applications, while PyTorch provides flexibility and is highly popular in research environments.
+
+\begin{longtable}{@{}p{3cm}p{3cm}p{3cm}p{3cm}@{}}
+    \caption{Comparative Analysis of Machine Learning Frameworks.}
+    \label{tab:ml_ca} \\
+    \toprule
+    \textbf{Feature} & \textbf{Scikit-learn} & \textbf{TensorFlow} & \textbf{PyTorch} \\
+    \midrule
+    \endfirsthead
+    \toprule
+    \textbf{Feature} & \textbf{Scikit-learn} & \textbf{TensorFlow} & \textbf{PyTorch} \\
+    \midrule
+    \endhead
+    \bottomrule
+    \endfoot
+    \bottomrule
+    \endlastfoot
+    Algorithms Supported & Classical ML (Random Forest) & Deep Learning and Classical ML & Deep Learning and Research ML \\
+    Scalability & Moderate & High & High \\
+    Ease of Use & Beginner-friendly & Moderate complexity & High flexibility for research \\
+    Deployment & Less optimized for deployment & Production-ready & Suitable for research \& testing \\
+    Flexibility & Limited to classical models & High for both models and tuning & High for experimentation \\
+\end{longtable}
+
+As outlined in Table~\ref{tab:ml_ca}, Scikit-learn is a user-friendly and effective library for implementing classical machine learning algorithms such as Random Forest and Naive Bayes. 
+TensorFlow excels in scalability and is well-suited for production environments, making it ideal for deep learning applications. 
+On the other hand, PyTorch is known for its flexibility and dynamic computation graphs, making it the preferred choice for research-focused machine learning and experimentation.
 
 \subsection{Conclusion}
 Based on the comparative analysis, QRadar, IBM QRadar SOAR, and Scikit-learn emerge as the most suitable technologies for this project due to their strong integration, automation capabilities, and alignment with the project goals. 
