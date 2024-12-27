@@ -413,7 +413,7 @@ The model assigns a new instance to the class with the highest posterior probabi
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.5\textwidth]{ch2/assets/Flow-chart-for-Naive-Bayesian-classification.png}
+    \includegraphics[width=0.3\textwidth]{ch2/assets/Flow-chart-for-Naive-Bayesian-classification.png}
     \caption{Schematic Diagram of the Naive Bayes Classification Process from \parencite{Sneha2019}}
     \label{fig:naive_bayes}
 \end{figure}
@@ -531,58 +531,93 @@ The subsequent subsections provide an overview of the tools in each category, fo
 
 \subsection{SIEM Tools}
 
-In this subsection, the three leading SIEM tools, QRadar, Splunk, and LogRhythm, were chosen for their advanced threat detection, log aggregation, and real-time security analytics. 
+In this subsection, the three leading SIEM tools, QRadar, Splunk, and LogRhythm \parencite{exabeam2024}, were chosen for their advanced threat detection, log aggregation, and real-time security analytics. 
 Based on industry adoption, integration capabilities, and performance in SOC environments, each platform offers unique features for efficient incident detection and response.
 
 \subsubsection{QRadar}
-QRadar is an industry-leading \gls{SIEM} solution developed by IBM. 
-It provides advanced threat detection and automated response capabilities. 
-QRadar aggregates and correlates log data from multiple sources, enabling analysts to detect anomalies, identify risks, and prioritize responses efficiently.
+QRadar is a SIEM solution initially developed by IBM and later acquired by Palo Alto Networks \parencite{paloalto2024}. 
+It excels in advanced threat detection, log aggregation, and automated incident response by collecting and correlating data from various sources like firewalls and network devices. Its features, including anomaly detection and event prioritization, help analysts focus on critical threats, reducing false positives.
+
+A key advantage of QRadar is its integration with other IBM and Palo Alto tools, facilitating seamless workflows. 
+Its machine learning support enables organizations to detect emerging threats, while its modular architecture ensures scalability for businesses of all sizes. 
+Recent updates enhance QRadar's capabilities for modern hybrid and cloud-native infrastructures.
 
 \subsubsection{Splunk}
-Splunk is a robust \gls{SIEM} platform designed to analyze and visualize machine data. 
-Its real-time search and analytics features make it highly effective for monitoring, detecting, and responding to cybersecurity threats. 
-Splunk's extensive ecosystem of apps enhances its functionality for various use cases.
+Splunk is a powerful and versatile SIEM platform known for its real-time monitoring and analytics. 
+It enables organizations to detect and respond to cybersecurity threats quickly. 
+It excels at processing large volumes of machine-generated data, making it essential for security teams in complex IT environments.
+
+With a broad ecosystem of applications, Splunk supports various use cases such as threat hunting, compliance management, and anomaly detection. 
+Splunk Enterprise Security (ES)'s add-on offers tailored solutions for SOC environments, including prebuilt dashboards and customizable alerts. 
+
+Splunk's user-friendly interface and robust reporting tools cater to analysts of all skill levels, while its integration with machine learning enhances proactive threat management. 
+Splunk's flexibility and capabilities make it a preferred choice for organizations seeking a reliable SIEM solution.
 
 \subsubsection{LogRhythm}
-LogRhythm is a comprehensive \gls{SIEM} solution focused on streamlining threat detection and response workflows. 
-With advanced analytics and machine learning integration, LogRhythm enables organizations to quickly identify and remediate security incidents while maintaining compliance.
+LogRhythm is a robust SIEM platform aimed at enhancing threat detection and incident response. 
+Its user-friendly design and integration capabilities help streamline SOC workflows. 
+The platform utilizes advanced analytics, behavioral anomaly detection, and machine learning for effective threat identification. 
+
+LogRhythm also excels in compliance management with preconfigured templates for regulations like GDPR, HIPAA, and PCI-DSS. 
+Its Threat Lifecycle Management (TLM) framework facilitates efficient threat detection and remediation with structured workflows. 
+
+A key highlight is its seamless integration with various third-party tools, along with a centralized dashboard that provides actionable insights for SOC teams. 
+Additionally, LogRhythm offers flexible deployment options, making it suitable for diverse infrastructure needs.
 
 \subsection{Ticketing Tools}
 
-This subsection focuses on three essential ticketing tools: IBM QRadar SOAR, ServiceNow, and Zendesk. 
+This subsection focuses on three ticketing tools: IBM QRadar SOAR, ServiceNow, and Zendesk. 
 These tools were selected for their capabilities in automating workflows, improving incident management, and integrating with \gls{SIEM} systems. 
 Practical ticketing tools are vital for efficiently managing security incidents, reducing response times, and promoting collaboration within \gls{SOC} teams.
 
 \subsubsection{IBM QRadar SOAR}
-IBM QRadar SOAR integrates seamlessly with QRadar SIEM to enhance incident management. 
-It offers playbook automation, case management, and collaboration tools, enabling analysts to streamline their workflows and improve response times.
+IBM QRadar SOAR enhances the QRadar SIEM platform by streamlining incident management and security operations. 
+It automates workflows, minimizing manual tasks, and features playbook automation that allows analysts to execute consistent responses tailored to organizational policies. 
+The comprehensive case management system centralizes tracking of incidents, evidence, and communications, fostering real-time collaboration. 
+Additionally, it integrates with various third-party tools like EDR systems and cloud services, enabling SOC teams to focus on high-priority threats and improving overall efficiency in incident resolution \parencite{ibm}.
 
 \subsubsection{ServiceNow}
-ServiceNow is a widely used platform for IT service management that extends its capabilities to incident management in cybersecurity. 
-Its integration with various tools and ability to automate workflows make it a valuable asset in SOC environments.
+ServiceNow is a versatile platform originally designed for IT service management (ITSM) that has expanded to include strong incident management for cybersecurity. 
+It is widely adopted across industries and integrates effectively with SIEM tools and other security systems, making it valuable for SOC teams.
+
+The Security Incident Response (SIR) module offers a centralized approach for managing security incidents, featuring workflow automation for incident triage, escalation, and remediation. 
+Its dashboard capabilities enable real-time monitoring and reporting, providing security managers with visibility into ongoing incidents.
+
+A key strength of ServiceNow is its seamless integration with vulnerability scanners, endpoint protection platforms, and threat intelligence feeds, enhancing its ability to prioritize alerts and correlate events. 
+Its scalable architecture makes it suitable for organizations of all sizes, from small businesses to global enterprises.
 
 \subsubsection{Zendesk}
-Zendesk is a versatile ticketing and customer support tool that can be adapted for managing security incidents. 
-Its user-friendly interface and integration capabilities simplify the management and tracking of security alerts.
+Zendesk, traditionally a customer service platform, has been adapted as a ticketing tool for managing security incidents in SOC environments. 
+Its user-friendly interface allows organizations to enhance incident management without extensive training. 
+The ticketing system helps analysts create, assign, and update tickets for security alerts, ensuring systematic documentation and resolution. 
+
+Zendesk integrates with SIEM tools and offers customization options for workflows and notifications, further enhancing its functionality through its API and app marketplace. 
+While it may not have the advanced features of dedicated platforms like IBM QRadar SOAR and ServiceNow, Zendesk remains a cost-effective and accessible solution for improving incident management.
 
 \subsection{Machine Learning Frameworks}
 
-This section discusses three popular machine learning frameworks: Scikit-learn, TensorFlow, and PyTorch. 
+This section discusses three popular machine learning frameworks: Scikit-learn, TensorFlow, and PyTorch \parencite{mlframeworks}.
 These frameworks effectively implement scalable machine learning models in research and production. 
 Machine learning enhances cybersecurity by automating alert triage and reducing false positives.
 
 \subsubsection{Scikit-learn}
-Scikit-learn is a Python-based machine learning library well-suited for implementing Random Forest and Naive Bayes algorithms. 
-It provides a wide range of tools for data preprocessing, model training, and evaluation.
+Scikit-learn is a Python library known for its simplicity in implementing classical machine learning algorithms like Random Forest, Naive Bayes, and Support Vector Machines (SVM). 
+It excels in classification, regression, and clustering tasks and offers comprehensive preprocessing tools for effective data cleaning and transformation. 
+The library features strong cross-validation capabilities for evaluating model performance and integrates well with other Python libraries such as NumPy, pandas, and matplotlib. Scikit-learn is ideal for quick prototyping and development, making it a popular choice for both beginners and professionals, though it may not be as effective for deep learning or very large datasets.
 
 \subsubsection{TensorFlow}
-TensorFlow is an open-source machine learning framework developed by Google. 
-Known for its scalability and flexibility, TensorFlow supports both deep learning and traditional machine learning methods, including ensemble techniques like Random Forest.
+TensorFlow is an open-source framework developed by Google, designed for scalable machine learning and deep learning applications. 
+It efficiently handles large-scale computations and supports various techniques, including traditional algorithms and advanced architectures like CNNs and RNNs. 
+The Keras API within TensorFlow simplifies model building for users with limited experience.
+
+One of its key strengths is deploying models across platforms like mobile, edge computing, and cloud environments. 
+TensorBoard, a visualization tool, helps users monitor training and performance, enabling effective algorithm fine-tuning. 
+Despite a steeper learning curve compared to some alternatives, TensorFlow's extensive capabilities make it ideal for complex applications, including cybersecurity tasks like anomaly detection and threat prediction.
 
 \subsubsection{PyTorch}
-PyTorch is another popular machine learning library offering dynamic computation graphs and extensive support for research and deployment. 
-Its ease of use and flexibility make it a strong choice for implementing complex machine learning models in cybersecurity applications.
+PyTorch is a flexible machine learning library that has gained popularity among researchers and developers due to its dynamic computation graph, allowing real-time changes during model execution. 
+It excels in deep learning tasks like natural language processing, computer vision, and reinforcement learning, with the torch.nn module simplifying neural network creation and the autograd module providing efficient gradient computation. 
+PyTorch's intuitive design makes it easy for new users and integrates well with libraries like NumPy and ONNX. 
 
 \subsection{Comparative Analysis}
 
