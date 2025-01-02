@@ -3,14 +3,13 @@
 \label{chap:Chapter2}
 
 This chapter is divided into three parts. 
-Part I starts on the theoretical side by introducing Machine Learning, Security Operation Centers, Security Information and Event Managers and advanced threat detection and response mechanisms such as \gls{IPS}, \gls{IDS} and \gls{EDR}. 
+Part I starts on the theoretical side by introducing Machine Learning, Security Operation Centers, Security Information and Event Managers, and response mechanisms such as \gls{IPS}, \gls{IDS}, and \gls{EDR}. 
 It also explains how popular \gls{ML} classification models work and how to evaluate them. 
 Understanding these topics is the groundwork for material considered later in the chapter.
 
-The second part focuses on current works on the Automatic Classification of Security Alert Tickets. 
-It starts with general information about these systems and then reviews several publicly available datasets. 
-Finally, the chapter ends with a detailed assessment of existing systems similar to the one presented in this thesis.
-We have separated this analysis from the overview to explore their methods further.
+The second part focuses on the automatic classification of security alert tickets. 
+It begins with an overview of proposed solutions and then reviews several publicly available studies. 
+The chapter concludes with a detailed evaluation of existing systems that are similar to the one presented in this thesis. 
 
 The third and final part discusses existing technologies that \gls{SOC} may utilize. 
 These technologies are designed to support the workflow outlined in the first section about \gls{SOC}. 
@@ -19,11 +18,11 @@ The section will conclude with a summary of the key differences among the techno
 
 \section{Theoretical Introduction}
 
-Before diving into the technologies, tools, and methodologies used for automating the classification of security alert tickets, it is essential to understand some fundamental concepts first. 
-Concepts like, \gls{SOC}s, \gls{SIEM} systems, \gls{AI}—particularly \gls{ML}—and advanced threat detection and response mechanisms. 
+Before diving into the technologies, tools, and methodologies used for automating the classification of security alert tickets, it is essential to understand some fundamental concepts. 
+Concepts like, \gls{SOC}s, \gls{SIEM} systems, \gls{AI}, particularly \gls{ML}, and advanced threat detection and response mechanisms. 
 Such a foundation is indispensable for comprehending these systems' functions, construction work, advantages and limitations, and the actual performance comparison among different methods. 
-The chapter introduces \gls{SOC} and how it functions diving into , then moves on to the foundations of \gls{ML} and provides an overview of models frequently used for classification problems. 
-It also provides an overview of the methods for assessing classification model performance to set this in context for how these are used within the project.
+The chapter introduces \gls{SOC} and how it functions, then moves on to the foundations of \gls{ML} and provides an overview of models frequently used for classification problems. 
+It provides an overview of methods for assessing the performance of classification models, placing this in context for their use within the project.
 
 \subsection{Security Operations Center} 
 
@@ -36,7 +35,7 @@ It defends computer networks against the growing world of cyber threats.
 The main objective of a \gls{SOC} is to ensure continuous monitoring and incident response for enterprise systems \parencite{Zimmerman2014}. 
 This primarily focuses on preventing unauthorized access, cyber-attacks, and data breaches.
 
-This 24/7 facility leverages advanced technologies and skilled information security professionals to monitor the network continuously \parencite{Zimmerman2014}. 
+This \gls{24/7} facility leverages advanced technologies and skilled information security professionals to monitor the network continuously \parencite{Zimmerman2014}. 
 With sophisticated tools to detect anomalies, a \gls{SOC} can address threats before they escalate.
 
 \subsubsection{Definition and Characteristics of a SOC}
@@ -109,7 +108,6 @@ The increasing complexity of cybersecurity threats has compelled organizations t
 
 \gls{SIEM} systems gather and centralize security-related data to detect threats and respond to incidents effectively. 
 These systems connect logs from various sources to support security analytics, enabling real-time monitoring and retrospective analysis of past events \parencite{Shaw2022}.
-\gls{SIEM} systems normalize raw log data, correlate events, generate reports and issue alerts, and automate responses to security incidents using enriched contextual data \parencite{Vielberth2021}. 
 They integrate with cyber threat intelligence platforms, providing human analysts with advanced visual tools for seamless information sharing between organizations. 
 Additionally, they retain event data over extended periods, ensuring robust log management capabilities.
 
@@ -444,7 +442,7 @@ While this method excels at tracing complex multi-stage attacks, it requires fur
 Incorporating reinforcement learning, \textcite{Sethi2020} introduced a Deep Q-Network (DQN)-based context-adaptive intrusion detection system, which improved FPR and demonstrated robustness against several attacks. 
 Nevertheless, the distributed nature of their approach introduces practical deployment challenges, especially in SOC environments where centralized oversight is critical. 
 Similarly, \textcite{Nila2020} explored ML-based triage systems to automate alert classification and reduce false positives. 
-Their work effectively alleviated analyst fatigue by prioritizing actionable alerts, yet the scope of implementation remains limited to isolated systems.
+Their work effectively alleviated analyst fatigue by prioritizing actionable alerts, yet the scope of implementation remains limited to standalone systems.
 
 \textcite{Chandra2016} conducted a comprehensive study on email-based APT entry points, explicitly exploring the effectiveness of Bayesian spam filters\footnote{Bayesian spam filters classify emails as spam or legitimate using probabilities based on Bayes theorem.}.
 These filters demonstrated a strong capability to identify and differentiate between spear-phishing attempts and general spam emails, which is crucial for enhancing cybersecurity measures. 
@@ -525,9 +523,15 @@ While the Check Point solution is comprehensive and includes a full suite of too
 
 \section{Technologies}
 
+
+The following section presents some of the important technologies available in the three categories discussed: SIEM Tools, Ticketing Tools, and Machine Learning Frameworks. 
+The company utilizes QRadar as its SIEM solution and IBM QRadar SOAR and JIRA for ticketing and incident management. The subsequent subsections provide an overview of the tools in each category, followed by a comparative analysis highlighting their strengths and trade-offs.
+
+
 The following section presents some of the important technologies available in the three categories discussed: SIEM Tools, Ticketing Tools, and Machine Learning Frameworks. 
 Each category serves a unique purpose in the automatic classification of security alerts in a SOC.
-The subsequent subsections provide an overview of the tools in each category, followed by a comparative analysis highlighting their strengths and trade-offs.
+The tools used for this project were the same as those the company utilizes, including QRadar as its SIEM solution, IBM QRadar SOAR, and JIRA for ticketing and incident management.
+The subsequent subsections provide an overview of existing tools in each category, followed by a comparative analysis highlighting their strengths and trade-offs.
 
 \subsection{SIEM Tools}
 
@@ -566,7 +570,7 @@ Additionally, LogRhythm offers flexible deployment options, making it suitable f
 
 \subsection{Ticketing Tools}
 
-This subsection focuses on three ticketing tools: IBM QRadar SOAR, ServiceNow, and Zendesk. 
+This subsection focuses on three ticketing tools: IBM QRadar SOAR, ServiceNow, and JIRA. 
 These tools were selected for their capabilities in automating workflows, improving incident management, and integrating with \gls{SIEM} systems. 
 Practical ticketing tools are vital for efficiently managing security incidents, reducing response times, and promoting collaboration within \gls{SOC} teams.
 
@@ -586,19 +590,18 @@ Its dashboard capabilities enable real-time monitoring and reporting, providing 
 A key strength of ServiceNow is its seamless integration with vulnerability scanners, endpoint protection platforms, and threat intelligence feeds, enhancing its ability to prioritize alerts and correlate events. 
 Its scalable architecture makes it suitable for organizations of all sizes, from small businesses to global enterprises.
 
-\subsubsection{Zendesk}
-Zendesk, traditionally a customer service platform, has been adapted as a ticketing tool for managing security incidents in SOC environments. 
-Its user-friendly interface allows organizations to enhance incident management without extensive training. 
-The ticketing system helps analysts create, assign, and update tickets for security alerts, ensuring systematic documentation and resolution. 
+\subsubsection{JIRA}
+JIRA is widely recognized as a project management tool and has been adapted to manage security incidents in SOC environments. 
+Its user-friendly interface allows organizations to enhance incident management with minimal training requirements. 
+JIRA's ticketing system helps analysts create, assign, and update tickets for security alerts, ensuring systematic documentation and resolution.
 
-Zendesk integrates with SIEM tools and offers customization options for workflows and notifications, further enhancing its functionality through its API and app marketplace. 
-While it may not have the advanced features of dedicated platforms like IBM QRadar SOAR and ServiceNow, Zendesk remains a cost-effective and accessible solution for improving incident management.
+JIRA integrates effectively with SIEM tools and offers extensive customization options for workflows and notifications, further enhancing its functionality. 
+Although it lacks advanced features like playbook-driven automation found in IBM QRadar SOAR, JIRA remains a practical and cost-effective solution for incident management, especially for organizations already familiar with its ecosystem.
 
 \subsection{Machine Learning Frameworks}
 
 This section discusses three popular machine learning frameworks: Scikit-learn, TensorFlow, and PyTorch \parencite{mlframeworks}.
 These frameworks effectively implement scalable machine learning models in research and production. 
-Machine learning enhances cybersecurity by automating alert triage and reducing false positives.
 
 \subsubsection{Scikit-learn}
 Scikit-learn is a Python library known for its simplicity in implementing classical machine learning algorithms like Random Forest, Naive Bayes, and Support Vector Machines (SVM). 
@@ -657,27 +660,27 @@ LogRhythm focuses on compliance and features native machine learning capabilitie
     \caption{Comparative Analysis of Ticketing Tools.}
     \label{tab:tt_ca} \\
     \toprule
-    \textbf{Feature} & \textbf{IBM QRadar SOAR} & \textbf{ServiceNow} & \textbf{Zendesk} \\
+    \textbf{Feature} & \textbf{QRadar SOAR} & \textbf{ServiceNow} & \textbf{JIRA} \\
     \midrule
     \endfirsthead
     \toprule
-    \textbf{Feature} & \textbf{IBM QRadar SOAR} & \textbf{ServiceNow} & \textbf{Zendesk} \\
+    \textbf{Feature} & \textbf{IBM QRadar SOAR} & \textbf{ServiceNow} & \textbf{JIRA} \\
     \midrule
     \endhead
     \bottomrule
     \endfoot
     \bottomrule
     \endlastfoot
-    Integration & Seamless with QRadar SIEM & Broad integrations across IT & Moderate integrations \\
-    Automation & Playbook-driven workflows & Customizable workflow automation & Limited automation capabilities \\
+    Integration & Seamless with QRadar SIEM & Broad integrations across IT & Extensive integrations with development tools \\
+    Automation & Playbook-driven workflows & Customizable workflow automation & Moderate workflow automation \\
     Incident Management & Case management and playbooks & Advanced IT service management & Simplified incident tracking \\
     Ease of Use & Moderate & Customizable but complex & Highly user-friendly \\
 \end{longtable}
-
-Table~\ref{tab:tt_ca} outlines the strengths and weaknesses of various ticketing tools. I
-BM QRadar SOAR closely integrates with the QRadar SIEM platform, providing strong automation through playbooks and advanced incident management features. 
+    
+Table~\ref{tab:tt_ca} outlines the strengths and weaknesses of various ticketing tools. 
+IBM QRadar SOAR closely integrates with the QRadar SIEM platform, providing strong automation through playbooks and advanced incident management features. 
 ServiceNow is notable for its flexibility and capability to cater to multiple IT departments. 
-In contrast, Zendesk offers a more user-friendly and cost-effective solution with limited automation functionalities.
+In contrast, JIRA offers a more user-friendly and cost-effective solution, with moderate automation functionalities and extensive integration capabilities.
 
 \subsubsection{Machine Learning Frameworks}
 
