@@ -312,6 +312,7 @@ KOMA-script documentation for details.}]{fancyhdr}
 \newcommand*{\university}[1]{\def\univname{#1}}
 \newcommand*{\department}[1]{\def\deptname{#1}}
 \newcommand*{\keywords}[1]{\def\keywordnames{#1}}
+\newcommand*{\keywordsotherlang}[1]{\def\keywordotherlangnames{#1}}
 
 %----------------------------------------------------------------------------------------
 %	TITLEPAGE PAGE DESIGN
@@ -443,7 +444,8 @@ KOMA-script documentation for details.}]{fancyhdr}
 
 \newcommand{\abslabelotherlang}{Resumo}
 \providecaptionname{american,australian,british,canadian,english,newzealand,UKenglish,USenglish}{\abslabelotherlang}{Resumo}
-\providecaptionname{portuguese}{\abslabelotherlang}{Abstract}  
+\providecaptionname{portuguese}{\abslabelotherlang}{Abstract}
+\newcommand{\keywordsotherlanglabel}{Palavras-Chave}
 \newenvironment{abstractotherlanguage}{
 	\checktoopen
 	\tttypeout{\abslabel}
@@ -452,6 +454,8 @@ KOMA-script documentation for details.}]{fancyhdr}
 	\chapter*{\abslabelotherlang}
 }
 {
+  \bigskip
+  {\bf \keywordsotherlanglabel:} {\keywordotherlangnames}
   \vfil\vfil\vfil\null
 }
 
