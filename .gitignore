@@ -1,3 +1,10 @@
 build/
 .vscode/
 .botArchTemp.md
+
+SOC_Bot_Implementation/data/
+SOC_Bot_Implementation/logs/
+SOC_Bot_Implementation/.env/
+SOC_Bot_Implementation/.python-version
+
+**/__pycache__/
