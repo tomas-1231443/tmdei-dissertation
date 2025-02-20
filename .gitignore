@@ -8,3 +8,4 @@ SOC_Bot_Implementation/.env/
 SOC_Bot_Implementation/.python-version
 
 **/__pycache__/
+**/.DS_Store
