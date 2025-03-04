@@ -2,7 +2,8 @@
 
 VERBOSE = False
 
-DEFAULT_MODEL_PATH = "src/models/trained_model.joblib"
+DEFAULT_MODEL_DIR = "src/models/"
+DEFAULT_EXCEL_PATH = "data/jira_data.xlsx"
 
 EXCEL_COLUMNS = [
     "Issue ID",

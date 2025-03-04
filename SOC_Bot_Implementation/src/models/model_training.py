@@ -1,49 +1,84 @@
+import os
+import re
+import glob
+import joblib
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
-import joblib
-import os
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from src.logger import get_logger
-from src.config import DEFAULT_MODEL_PATH  # you might want to add this in config.py
+from src.config import DEFAULT_MODEL_DIR
 
 logger = get_logger(__name__)
 
-MODEL_PATH = DEFAULT_MODEL_PATH if 'DEFAULT_MODEL_PATH' in globals() else "src/models/trained_model.joblib"
+def get_model_filepath(version: int = None) -> str:
+    """
+    Returns the file path for the model of the specified version.
+    If version is None, returns the filepath of the latest version.
+    """
+    if version is not None:
+        return os.path.join(DEFAULT_MODEL_DIR, f"model_v{version}.joblib")
+    else:
+        files = glob.glob(os.path.join(DEFAULT_MODEL_DIR, "model_v*.joblib"))
+        version_numbers = []
+        for file in files:
+            match = re.search(r"model_v(\d+)\.joblib", file)
+            if match:
+                version_numbers.append(int(match.group(1)))
+        if version_numbers:
+            latest_version = max(version_numbers)
+            return os.path.join(DEFAULT_MODEL_DIR, f"model_v{latest_version}.joblib")
+        else:
+            return None
+        
+def get_next_version() -> int:
+    """
+    Returns the next version number for saving a new model.
+    """
+    files = glob.glob(os.path.join(DEFAULT_MODEL_DIR, "model_v*.joblib"))
+    version_numbers = []
+    for file in files:
+        match = re.search(r"model_v(\d+)\.joblib", file)
+        if match:
+            version_numbers.append(int(match.group(1)))
+    return max(version_numbers) + 1 if version_numbers else 1
 
-def train_false_positive_detector(df: pd.DataFrame, label_col: str = "Status") -> RandomForestClassifier:
+def train_rf_model(df, label):
     """
-    Trains a RandomForestClassifier to detect if an alert is a false positive.
+    Trains a RandomForestClassifier on the provided DataFrame.
+    Assumes that features are in numeric form. For raw text data, integrate a text
+    vectorization pipeline (e.g., TfidfVectorizer) as a TODO.
     
-    Note:
-    - Currently, this function assumes that the input features are numeric.
-    - TODO: Integrate a text processing pipeline (e.g., using TfidfVectorizer) to handle raw text input.
-      This would involve combining the text from relevant columns (such as 'Description' and other text fields)
-      and converting them into a numeric feature vector before training.
+    Returns the trained model and automatically saves it with a new version number.
     """
-    # For now, we assume that non-label columns are numeric.
-    X = df.drop(columns=[label_col])
-    y = df[label_col]
-    
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    
-    model = RandomForestClassifier(n_estimators=100, random_state=42)
-    model.fit(X_train, y_train)
-    score = model.score(X_test, y_test)
-    logger.info(f"False-Positive Detector Accuracy: {score:.2f}")
 
-    # Save the trained model to disk
-    joblib.dump(model, MODEL_PATH)
-    logger.info(f"Model saved to {MODEL_PATH}")
-    return model
+    model = None
 
-def load_trained_model():
+    version = get_next_version()
+    model_path = get_model_filepath(version)
+    save_model(model, model_path)
+
+    logger.info(f"Model version {version} saved to {model_path}")
+    pass
+
+def load_model(version: int = None) -> RandomForestClassifier:
     """
-    Loads the trained model from disk if it exists.
+    Loads a trained model from disk.
+    If version is provided, loads that specific version; otherwise, loads the most recent version.
+    Returns None if no model file is found.
     """
-    if os.path.exists(MODEL_PATH):
-        model = joblib.load(MODEL_PATH)
-        logger.info(f"Loaded model from {MODEL_PATH}")
+    model_path = get_model_filepath(version)
+    if model_path and os.path.exists(model_path):
+        model = joblib.load(model_path)
+        logger.info(f"Loaded model from {model_path}")
         return model
     else:
-        logger.info("No pre-trained model found. Training a new model.")
+        logger.error("No model file found.")
         return None
+    
+def save_model(model: RandomForestClassifier, path: str) -> None:
+    """
+    Saves the trained model to disk at the given path.
+    """
+    joblib.dump(model, path)
+    logger.info(f"Model saved to {path}")
