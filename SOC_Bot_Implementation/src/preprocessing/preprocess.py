@@ -7,3 +7,5 @@ from src.config import EXCEL_COLUMNS
 
 # TODO: Further down the line, integrate a pipeline approach (scikit-learn Pipeline)
 # TODO: Add advanced text cleaning or normalization if needed
+def preprocess_bulk_alerts(df):
+    return None

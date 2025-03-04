@@ -43,7 +43,7 @@ def get_next_version() -> int:
             version_numbers.append(int(match.group(1)))
     return max(version_numbers) + 1 if version_numbers else 1
 
-def train_rf_model(df, label):
+def train_rf_model(df, label_col):
     """
     Trains a RandomForestClassifier on the provided DataFrame.
     Assumes that features are in numeric form. For raw text data, integrate a text
