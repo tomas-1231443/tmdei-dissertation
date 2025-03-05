@@ -6,6 +6,7 @@ SOC_Bot_Implementation/data/
 SOC_Bot_Implementation/logs/
 SOC_Bot_Implementation/.env/
 SOC_Bot_Implementation/.python-version
+SOC_Bot_Implementation/venv/
 
 **/__pycache__/
 **/.DS_Store
