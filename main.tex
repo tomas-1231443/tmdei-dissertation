@@ -1,0 +1,157 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% TMDEI Dissertation
+% LaTeX Template
+% Version 0.1 (Dec/2015)
+%
+% Adapted to TMDEI/ISEP style (Dec/2015) by
+%  Nuno Pereira (nap@isep.ipp.pt) and
+%  Paulo Baltarejo (pbs@isep.ipp.pt)
+%
+% Based on MastersDoctoralThesis Version 1.2 by Vel (vel@latextemplates.com) and
+% Johannes Böttcher, downloaded from (21/11/15):
+% http://www.LaTeXTemplates.com
+%
+% This template is originally based on a template by:
+% Steve Gunn (http://users.ecs.soton.ac.uk/srg/softwaretools/document/templates/)
+% Sunil Patel (http://www.sunilpatel.co.uk/thesis-template/)
+%
+% Template license:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%https://www.overleaf.com/project/5bfd7e508cfbf932785021c9
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[
+11pt, % The default document font size, options: 10pt, 11pt, 12pt
+%oneside, % Two side (alternating margins) for binding by default, uncomment to switch to one side (for drafting/reading purposes)
+english, % english for English;
+%portuguese,% for Portuguese; delete temporary files if you change language (e.g. 'make clean; make')
+singlespacing, % Single line spacing, alternatives: onehalfspacing or doublespacing (for drafting/reading purposes)
+%draft, % Uncomment to enable draft mode (no pictures, no links, overfull hboxes indicated)
+%nolistspacing, % If the document is onehalfspacing or doublespacing, uncomment this to set spacing in lists to single
+liststotoc, % Uncomment to add the list of figures/tables/etc to the table of contents (recommended)
+%toctotoc, % Uncomment to add the main table of contents to the table of contents (not recommended)
+parskip, % Add space between paragraphs (recommended)
+%nohyperref, % Uncomment to not load the hyperref package (not recommended)
+nohyperreflinkcolor, % hyperref links are not colored (comment to color links, for example to produce an electronic-only version)
+headsepline, % Uncomment to get a line under the header
+]{tmdei-style} % The class file specifying the document structure
+
+\usepackage{tikz} % Required for creating graphics programmatically (can be removed if not used)
+\usetikzlibrary{shapes.geometric, arrows, positioning} % Required for fancy arrows in TiKZ graphics (can be removed if not used)
+
+\tikzstyle{startstop} = [rectangle, rounded corners, minimum width=3cm, minimum height=1cm,text centered, draw=black, fill=red!30]
+\tikzstyle{process} = [rectangle, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=blue!30]
+\tikzstyle{decision} = [diamond, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=green!30]
+\tikzstyle{arrow} = [thick,->,>=stealth]
+
+\usepackage{pgfplots} % Required for drawing high--quality function plots (can be removed if not used)
+\pgfplotsset{compat=newest}
+
+\usepackage{pdflscape} % Use pdflscape for rotated pages in PDF
+
+%
+% Next you have examples of admissable citation styles; we recomend using the authoryear-comp citation style (which resembles Harvard); don't forget to only uncomment one
+%
+
+% authoryear-comp: recommended citation style (e.g. (Buendía, 1860), (Buendía 1910, Arcadio 1940))
+\usepackage[style=authoryear-comp,backend=biber]{biblatex} % Bibtex backend with the authoryear-comp citation style (authoryear citations, bibliography ordered alphabetically)
+
+% numeric citation style (e.g. [1], [1-3])
+%\usepackage[style=numeric-comp,sorting=none,backend=biber]{biblatex} % Bibtex backend with the numeric-comp citation style (numeric citations, bibliography ordered by appearance)
+
+% alphabetic citation style (e.g. [Buendía10], [Buendía10, Arcadio40])
+%\usepackage[style=alphabetic,sorting=none,backend=biber]{biblatex} % Bibtex backend with the alphabetic citation style (alphabetic citations, bibliography ordered by appearance)
+
+
+\addbibresource{mainbibliography.bib} % The filename of the bibliography
+
+\makeglossaries % build the glossary
+
+%----------------------------------------------------------------------------------------
+%	THESIS INFORMATION
+%----------------------------------------------------------------------------------------
+
+\thesistitle{Automatic Classification of Security Alerts in SOC} % Your thesis title, this is used in the title, print it elsewhere with \ttitle
+
+%\thesissubtitle{{[}Thesis Subtitle{]}} % Your thesis title, this is used in the title, print it elsewhere with \tsubtitle
+
+\author{Tomás Ladeiro \textsc{Domingues}} % Your name, this is used in the title page, print it elsewhere with \authorname
+
+\subjectarea{Cybersecurity And Systems Administration} % Specialisation area (Cybersecurity and Systems Administration; Data Engineering; Software Engineering;Games, Graphics and Interactive Systems; Information and Knowledge Systems), used in the title page, print it elsewhere with \areaname
+
+\advisor{Jorge Pinto \textsc{Leite}} % Your advisors's (academic mentor) name, this is used in the title page, print it elsewhere with \advname
+
+\supervisor{Gonçalo \textsc{Amaro}} % Your supervisor's (company, hosting institution mentor) name, this is used in the title page, print it elsewhere with \supname (comment, if no supervisor, or same as advisor)
+
+%\coadvisor{Dr. Jack \textsc{Smith}} % Your co-advisors's name, this is used in the title page, print it elsewhere with \coadvname (comment, if no co-advisor)
+
+%\cosupervisor{Dr. Jack \textsc{Smith}} % Your co-advisors's name, this is used in the title page, print it elsewhere with \cosupname (comment, if no co-supervisor)
+
+% if committeepresident is defined, will add the thesis committee to the front page
+%\committeepresident{Dr. Jonny Smith, Professor, DEI/ISEP} % Name of the president of the evaluation committee, print it elsewhere with \presidentname
+
+%\committeemembers{Dr. Jaimie Smith, Professor, DEI/ISEP\\Dr. Jones Smith, Professor, DEI/ISEP\\Dr. Jagger Smith, Professor, DEI/ISEP} % Name of the evaluation committee members (up to four), print it elsewhere with \committee
+
+\keywords{Cybersecurity, SIEM, QRadar, Machine Learning, Automation, Ticket Triage} % Please define up to 6 keywords that better describe your work, print it elsewhere with \keywordnames
+\keywordsotherlang{Cibersegurança, SIEM, QRadar, Aprendizagem Automática, Automação, Triagem de Alertas}
+
+\university{\href{https://www.isep.ipp.pt}{Instituto Superior de Engenharia do Porto}} % Your university's name and URL, this is used in the title page and abstract, print it elsewhere with \univname
+
+\department{\href{https://www.dei.isep.ipp.pt}{Departamento de Engenharia Informática}} % Your department's name and URL, this is used in the title page and abstract, print it elsewhere with \deptname
+
+\thesisdate{Porto, \today} % thesis date,  print it elsewhere with \tdate
+
+\hypersetup{pdftitle=\ttitle} % Set the PDF's title to your title
+\hypersetup{pdfauthor=\authorname} % Set the PDF's author to your name
+\hypersetup{pdfkeywords=\keywordnames} % Set the PDF's keywords to your keywords
+
+\begin{document}
+
+%----------------------------------------------------------------------------------------
+%	FRONT MATTER
+%----------------------------------------------------------------------------------------
+
+% Include the frontmatter of your thesis here
+\input{frontmatter/frontmatter}
+
+%----------------------------------------------------------------------------------------
+%	MAIN BODY
+%----------------------------------------------------------------------------------------
+
+% Include the chapters of the thesis as separate folder for each chapter
+% Uncomment the lines as you write the chapters
+
+\input{ch1/chapter1}
+\input{ch2/chapter2}
+\input{ch3/chapter3}
+\input{ch4/chapter4}
+\input{ch5/chapter5}
+\input{ch6/chapter6}
+
+
+
+%----------------------------------------------------------------------------------------
+%	BIBLIOGRAPHY
+%----------------------------------------------------------------------------------------
+
+\printbibliography[heading=bibintoc]
+
+%----------------------------------------------------------------------------------------
+%	THESIS CONTENT - APPENDICES
+%----------------------------------------------------------------------------------------
+% Include the appendices of the thesis as separate files from the Appendices folder
+% Uncomment the lines as you write the Appendices
+% \begin{appendices}
+
+% \input{appendices/appendixA}
+% %\input{appendices/appendixB}
+% %\input{appendices/appendixC}
+
+% \end{appendices}
+%----------------------------------------------------------------------------------------
+
+\end{document}

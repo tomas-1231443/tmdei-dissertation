@@ -1,0 +1,16 @@
+build/
+.vscode/
+.botArchTemp.md
+
+SOC_Bot_Implementation/data/
+SOC_Bot_Implementation/logs/
+SOC_Bot_Implementation/.env/
+SOC_Bot_Implementation/.python-version
+SOC_Bot_Implementation/venv/
+SOC_Bot_Implementation/.pytest_cache/
+SOC_Bot_Implementation/.idea/
+
+**/__pycache__/
+**/.DS_Store
+
+*.joblib

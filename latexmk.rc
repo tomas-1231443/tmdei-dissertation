@@ -1,0 +1,14 @@
+$out_dir = 'build';
+$aux_dir = 'build';
+
+$pdflatex = 'pdflatex -interaction=nonstopmode %O %S';
+
+$pdf_previewer = "open -a Preview %S";
+
+$always_view_file_via_temporary = 1;
+
+$preview_continuous_mode = 0;
+
+sub clean_hook {
+    # Add any additional cleanup commands here if required
+}

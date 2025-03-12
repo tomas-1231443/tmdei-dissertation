@@ -1,0 +1,2 @@
+Tuning results:
+Best parameters found: {'classifier__estimator__class_weight': None, 'classifier__estimator__max_depth': 40, 'classifier__estimator__min_samples_leaf': 1, 'classifier__estimator__min_samples_split': 10, 'classifier__estimator__n_estimators': 150}, Best cross-validation score: 0.8154
