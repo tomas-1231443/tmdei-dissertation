@@ -69,6 +69,23 @@ def get_next_version() -> int:
             version_numbers.append(int(match.group(1)))
     return max(version_numbers) + 1 if version_numbers else 1
 
+from sentence_transformers import SentenceTransformer
+
+def vectorize_sentence_bert(descriptions, model_name="all-MiniLM-L6-v2"):
+    """
+    Vectorizes descriptions using a pre-trained Sentence-BERT model.
+    
+    Parameters:
+      - descriptions: iterable of text strings.
+      - model_name: identifier for a SentenceTransformer model.
+      
+    Returns:
+      - numpy.ndarray of shape (n_samples, embedding_dim)
+    """
+    model = SentenceTransformer(model_name)
+    embeddings = model.encode(descriptions.tolist(), show_progress_bar=True)
+    return np.array(embeddings)
+
 @with_logger
 def train_rf_model(df: pd.DataFrame, tune: bool = False, *, logger) -> Dict[str, Any]:
     """
@@ -90,8 +107,13 @@ def train_rf_model(df: pd.DataFrame, tune: bool = False, *, logger) -> Dict[str,
     logger.info("Starting training of the Random Forest model for multi-output classification.")
 
     # 1. Vectorize the Description column.
-    vectorizer = TfidfVectorizer(max_features=10000)
-    X = vectorizer.fit_transform(df["Description"])    
+    # vectorizer = TfidfVectorizer(max_features=10000)
+    # X = vectorizer.fit_transform(df["Description"])  
+       
+    # 1. Vectorize the Description column using Bert.
+    vectorizer = None
+    X = vectorize_sentence_bert(df["Description"])
+
     # 2. Encode targets.
     le_priority = LabelEncoder()
     le_taxonomy = LabelEncoder()
@@ -126,7 +148,7 @@ def train_rf_model(df: pd.DataFrame, tune: bool = False, *, logger) -> Dict[str,
 
     # 4. Create and train a multi-output classifier.
     # Best set so far is 100 estimators, max depth of None, min samples split of 2, min samples leaf of 1, class weight = None
-    base_rf = RandomForestClassifier(n_estimators=150, random_state=42, max_depth=40, min_samples_split=10, min_samples_leaf=1, class_weight=None)
+    base_rf = RandomForestClassifier(n_estimators=500, random_state=42, max_depth=40, min_samples_split=10, min_samples_leaf=1, class_weight='balanced')
     multi_rf = MultiOutputClassifier(base_rf)
 
     logger.info("Training started...")
@@ -167,7 +189,7 @@ def train_rf_model(df: pd.DataFrame, tune: bool = False, *, logger) -> Dict[str,
         cm_taxonomy_norm = cm_taxonomy.astype('float') / cm_taxonomy.sum(axis=1)[:, np.newaxis]
         taxonomy_class_names = le_taxonomy.classes_
         
-        fig_taxonomy = plt.figure(figsize=(17, 15))
+        fig_taxonomy = plt.figure(figsize=(22, 20))
         sns.set_theme(font_scale=1.2)
         sns.heatmap(cm_taxonomy_norm, annot=True, cmap=plt.cm.Greens, fmt=".2f",
                     xticklabels=taxonomy_class_names, yticklabels=taxonomy_class_names, linewidths=0.5)

@@ -4,7 +4,7 @@ build/
 
 SOC_Bot_Implementation/data/
 SOC_Bot_Implementation/logs/
-SOC_Bot_Implementation/.env/
+SOC_Bot_Implementation/.env*/
 SOC_Bot_Implementation/.python-version
 SOC_Bot_Implementation/venv/
 SOC_Bot_Implementation/.pytest_cache/

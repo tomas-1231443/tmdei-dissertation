@@ -136,7 +136,8 @@ def clean_text(text: str, *, logger) -> str:
     
     return final_text
 
-def preprocess_bulk_alerts(df: pd.DataFrame) -> pd.DataFrame:
+@with_logger
+def preprocess_bulk_alerts(df: pd.DataFrame, *, logger) -> pd.DataFrame:
     """
     Preprocesses the DataFrame of alerts for training an AI model that predicts
     'Priority' and 'Taxonomy' based on the raw text of the alert in the 'Description' column.
@@ -150,6 +151,9 @@ def preprocess_bulk_alerts(df: pd.DataFrame) -> pd.DataFrame:
       - Drop rows with missing values: To ensure data consistency, we remove rows missing any of the essential columns.
       - Clean the 'Description' column: We reduce noise by lowercasing text, removing punctuation, and stripping extra spaces.
     """
+    
+    df = df[(df['Source'] != 'Other') & (df['Source Alert Rule Name'].notna())]
+
     required_columns = ["Description", "Priority", "Taxonomy"]
     
     df = df[required_columns]
@@ -157,6 +161,30 @@ def preprocess_bulk_alerts(df: pd.DataFrame) -> pd.DataFrame:
     df = df.dropna(subset=required_columns)
 
     df = df[(df["Priority"] != "P4") & (df["Taxonomy"].str.lower() != "other")]
+
+    # 5. Random oversampling by Taxonomy
+    #    a) Identify the largest category size
+    taxonomy_counts = df["Taxonomy"].value_counts()
+    logger.debug(f"Taxonomy counts: {taxonomy_counts}")
+    max_len = taxonomy_counts.max()
+    logger.info(f"Max length: {max_len}")
+
+    #    b) Oversample smaller categories to match max_len
+    oversampled_dfs = []
+    for tax, count in taxonomy_counts.items():
+        sub_df = df[df["Taxonomy"] == tax]
+        if count < max_len:
+            # Number of additional samples needed
+            diff = max_len - count
+            # Randomly sample 'diff' rows with replacement
+            extra_rows = sub_df.sample(n=diff, replace=True, random_state=42)
+            sub_df = pd.concat([sub_df, extra_rows], ignore_index=True)
+        oversampled_dfs.append(sub_df)
+
+    #    c) Merge all oversampled data back
+    df = pd.concat(oversampled_dfs, ignore_index=True)
+
+    logger.debug(f"Oversampled taxonomy counts: {df['Taxonomy'].value_counts()}")
     
     tqdm.pandas(desc="Cleaning descriptions")
     df["Description"] = df["Description"].progress_apply(clean_text)
