@@ -17,6 +17,8 @@ from sklearn.multioutput import MultiOutputClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import LabelEncoder
 from sklearn.pipeline import Pipeline
+from sentence_transformers import SentenceTransformer
+from sklearn.base import BaseEstimator, TransformerMixin
 from src.logger import with_logger
 from src.config import DEFAULT_MODEL_DIR
 
@@ -69,22 +71,17 @@ def get_next_version() -> int:
             version_numbers.append(int(match.group(1)))
     return max(version_numbers) + 1 if version_numbers else 1
 
-from sentence_transformers import SentenceTransformer
+class SentenceBertVectorizer(BaseEstimator, TransformerMixin):
+    def __init__(self, model_name="all-MiniLM-L6-v2"):
+        self.model_name = model_name
 
-def vectorize_sentence_bert(descriptions, model_name="all-MiniLM-L6-v2"):
-    """
-    Vectorizes descriptions using a pre-trained Sentence-BERT model.
-    
-    Parameters:
-      - descriptions: iterable of text strings.
-      - model_name: identifier for a SentenceTransformer model.
-      
-    Returns:
-      - numpy.ndarray of shape (n_samples, embedding_dim)
-    """
-    model = SentenceTransformer(model_name)
-    embeddings = model.encode(descriptions.tolist(), show_progress_bar=True)
-    return np.array(embeddings)
+    def fit(self, X, y=None):
+        self.model_ = SentenceTransformer(self.model_name)
+        return self
+
+    def transform(self, X, y=None):
+        # X is expected to be an iterable of text strings.
+        return self.model_.encode(list(X), show_progress_bar=True)
 
 @with_logger
 def train_rf_model(df: pd.DataFrame, tune: bool = False, *, logger) -> Dict[str, Any]:
@@ -105,14 +102,10 @@ def train_rf_model(df: pd.DataFrame, tune: bool = False, *, logger) -> Dict[str,
           - "le_taxonomy": The LabelEncoder used for the Taxonomy labels.
     """
     logger.info("Starting training of the Random Forest model for multi-output classification.")
-
-    # 1. Vectorize the Description column.
-    # vectorizer = TfidfVectorizer(max_features=10000)
-    # X = vectorizer.fit_transform(df["Description"])  
        
     # 1. Vectorize the Description column using Bert.
-    vectorizer = None
-    X = vectorize_sentence_bert(df["Description"])
+    vectorizer = SentenceBertVectorizer(model_name="paraphrase-MiniLM-L6-v2")
+    X = vectorizer.fit_transform(df["Description"])
 
     # 2. Encode targets.
     le_priority = LabelEncoder()

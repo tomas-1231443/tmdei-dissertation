@@ -12,55 +12,7 @@ from src.config import EXCEL_COLUMNS
 
 @with_logger
 def clean_text(text: str, *, logger) -> str:
-    # """
-    # Clean and extract the relevant incident narrative from a description cell.
     
-    # Given the Description text format, I want to:
-    #   1. Extract only the text in the "h2. Description" section.
-    #   2. Remove formatting markers such as headings (h1., h2.), color tags ({color:...}), 
-    #      code markers ({code}), and separator lines (----).
-    #   3. Remove long JSON blocks that appear to be embedded (assumed to be noise for our purpose).
-    #   4. Remove extraneous backslashes and extra whitespace.
-      
-    # Decisions:
-    #   - Extracting "h2. Description": We assume that the relevant incident report details are
-    #     contained in the section that starts with "h2. Description" and ends when the next "h2." heading starts.
-    #   - Dropping headings and formatting tags: Markup like "h1.", "h2.", "{color:blue}", etc., are
-    #     purely cosmetic and do not contribute to the semantic content needed for training.
-    #   - Removing long JSON blocks: JSON structures in the text are detailed technical logs that are
-    #     unlikely to help with determining priority/taxonomy and may add significant noise.
-    
-    # Parameters:
-    #     text (str): The raw text from the "Description" column.
-    
-    # Returns:
-    #     str: The cleaned text containing only the relevant incident narrative.
-    # """
-
-    # match = re.search(r'(?si)h2\.\s*description\s*(.*?)(?=h2\.)', text)
-    # if match:
-    #     text = match.group(1)
-    # else:
-    #     pass
-
-    # text = text.lower()
-    
-    # text = re.sub(r'\{color:[^}]*\}', '', text)
-    # text = re.sub(r'\{code\}', '', text)
-    # text = re.sub(r'h\d+\.\s*', '', text)
-    # text = re.sub(r'-{2,}', '', text)
-    # text = re.sub(r'\\', '', text)
-    
-    # text = re.sub(r'\{.{50,}?\}', '', text)
-    
-    # text = re.sub(r"[\"']", "", text)
-    
-    # text = re.sub(r'(\b[\w\-\s]+\b)(\s+\1)+', r'\1', text)
-    
-    # text = re.sub(r'\s+', ' ', text).strip()
-    
-    # return text
-
     # 1. Extract content after "h2. Description"
     match_desc = re.search(r'(?si)h2\.\s*description\s*(.*?)(?=h2\.)', text)
     if not match_desc:
