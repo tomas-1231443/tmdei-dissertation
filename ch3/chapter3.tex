@@ -2,6 +2,201 @@
 \chapter{Method and Implementation}
 \label{chap:Chapter3}
 
+This chapter describes the overall methodology adopted to solve the problem at hand, including the technologies employed, the different solution strategies explored, and the implementation process. 
+It is divided into two main sections: the first introduces the method and solution design, while the second details the proof of concept, showcasing how the solution was implemented, tested, and optimized in a realistic environment.
+
 \section{Method}
+This section describes the methodological foundation of the project. 
+It begins by presenting the technologies used and continues with an outline of three distinct solution strategies to the problem. 
+Each approach is described through its pipeline and architectural design, offering a comparative view of possible solutions.
+
+\subsection{Technological Overview}
+In this subsection, a brief description of the main technologies and tools used throughout the project will be presented.
+
+\subsection{Problem-Solving Approaches}
+This subsection outlines three distinct approaches that were considered to address the problem. 
+Each approach is presented in its own section, including its specific pipeline and architectural details.
+
+\subsubsection{Random Forest with Reinforcement Learning Feedback Loop}
+A two-layered system where a \gls{RF} model, trained on historical alert data, provides an initial prediction. 
+This prediction is then adjusted by a \gls{RL} model that incorporates analyst feedback to refine output and generate a confidence score. 
+This solution allows for immediate deployment while enabling long-term adaptability through analyst interaction.
+
+\textbf{Notes for later:}
+\begin{itemize}
+    \item \textbf{Objective 3 (Dataset collection):} Uses curated historical data up to February as the foundation for \gls{RF} training.
+    \item \textbf{Objective 4 (Integration with SIEM):} Integrates with IBM SOAR; predictions and feedback loop are displayed in the existing dashboard interface.
+    \item \textbf{Objective 5 (Custom analyst dashboard):} Analysts can provide feedback directly through SOAR, helping the \gls{RL} model to adapt over time.
+    \item \textbf{Objective 6 (Testing and evaluation):} Live deployment on company infrastructure enables observation of false positive handling, confidence scoring, and adaptability of the system.
+\end{itemize}
+
+\paragraph{Pipeline}
+
+Figure~\ref{fig:solution1_pipeline} illustrates the data processing pipeline for this solution. 
+
+The system begins by ingesting raw security alert data, which is first passed through a pre-processing stage responsible for cleaning, normalizing, and extracting relevant features. 
+
+The processed data is then fed into a pre-trained \gls{RF} model, which generates an initial prediction regarding the alert's taxonomy and priority. 
+
+This prediction is subsequently refined by a \gls{RL} model that incorporates analyst feedback to adjust the output and assign a confidence score. 
+
+The final prediction, including taxonomy, priority, and confidence level, is displayed in the IBM SOAR analyst dashboard. 
+
+Analysts can provide feedback on each prediction, which is looped back to the \gls{RL} model, enabling it to continuously learn and adapt to evolving threats and improve classification accuracy over time.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth]{ch3/assets/solution1_pipeline.png}
+    \caption{Pipeline of the Random Forest with Reinforcement Learning Feedback Loop Solution}
+    \label{fig:solution1_pipeline}
+\end{figure}
+
+\paragraph{Architecture}
+
+The diagram in Figure~\ref{fig:solution1_architecture} illustrates the architecture of the \gls{RF} system with a \gls{RL} feedback loop solution designed for the classification of security alerts in a Security Operations Center (SOC) environment.
+
+The architecture is organized into three major sections:
+
+\begin{enumerate}
+    \item \textbf{Analyst Device}: The diagram begins with the \textbf{Analyst Device} in the IBM SOAR system, represented by a \textbf{Browser} (HTML5 interface). This device acts as the point of interaction where security analysts review and manage alerts. The HTML5 artifact represents the user interface, which is connected to the IBM SOAR Server for further processing. The analyst logs into the system through the \textbf{Authentication} component, enabling access to the alert management interface.
+    
+    \item \textbf{IBM SOAR Server}: The IBM SOAR Server is the central system for managing security alerts. It contains the \textbf{Web Server}, which facilitates communication with the \textbf{Analyst Device}. The \textbf{Authentication} component ensures secure access for the analyst, while the \textbf{User Interface} artifact represents the front-end used by analysts to interact with alerts. The server sends requests to the \textbf{Bot Container} through the \texttt{/predict} endpoint, triggering the alert classification process. Once the alert is processed, the \texttt{/feedback} endpoint is used to receive the analyst’s input and store the feedback for further training of the reinforcement learning model.
+    
+    \item \textbf{Dedicated Company Server}: The \textbf{Dedicated Company Server} hosts the \textbf{Bot Container}, which is deployed on a \textbf{Virtual Machine (VM)}. This container is responsible for the core functionality of the solution, consisting of three main components:
+    \begin{itemize}
+        \item \textbf{API Gateway}: This component serves as the entry point for receiving requests from the IBM SOAR Server and handling communication between the components inside the bot container. It processes the incoming alert data and forwards it to the appropriate modules.
+        \item \textbf{Pre-Processing Module}: This module cleans and prepares the incoming alert data, extracting features and transforming them into a suitable format for the model.
+        \item \textbf{Machine Learning Module}: The \textbf{Machine Learning Module} applies the \gls{RF} model to classify the alert based on historical data. This model is further refined through the \gls{RL} model, which adjusts its predictions based on feedback received from analysts.
+    \end{itemize}
+\end{enumerate}
+
+The flow of operations is as follows:
+\begin{enumerate}
+    \item The \textbf{Analyst Device} sends alert data to the IBM SOAR Server, where it is routed to the \textbf{Bot Container} via the \texttt{/predict} endpoint.
+    \item The \textbf{Bot Container} processes the data through the \textbf{Pre-Processing} and \textbf{Machine Learning} modules, generating predictions.
+    \item These predictions are sent back to the IBM SOAR Server and displayed on the analyst’s interface.
+    \item When the analyst closes the ticket, the \texttt{/feedback} endpoint is used to send feedback to the \textbf{Bot Container}, allowing the \gls{RL} model to adjust and refine the \gls{RF} model’s predictions over time.
+\end{enumerate}
+
+This architecture is designed to be modular and scalable, allowing for easy integration with existing systems and the ability to adapt to evolving security threats.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.7\textwidth]{ch3/assets/Soltution1_Archquiteture.png}
+    \caption{Architecture of the Random Forest with Reinforcement Learning Feedback Loop Solution}
+    \label{fig:solution1_architecture}
+\end{figure}
+
+\subsubsection{End-to-End Deep Learning Classifier with Feature Fusion}
+A single \gls{DNN} trained end-to-end on labeled security alert data. 
+It ingests enriched alert features that include raw SIEM logs, analyst comments, and metadata, using attention-based layers to identify the most relevant features. 
+This model is deployed directly to make predictions and confidence scores in real time.
+
+\textbf{Notes for later:}
+\begin{itemize}
+    \item \textbf{Objective 2:} Uses a \gls{DLM} that differs from classical \gls{ML}, designed to learn feature importance and complex relationships natively.
+    \item \textbf{Objective 3:} Requires a well-labeled and feature-rich dataset, including alert content, origin, severity, and manual annotations.
+    \item \textbf{Objective 4:} Connected to \gls{SIEM} for live alert feed; the model automatically classifies alerts in real time.
+    \item \textbf{Objective 5:} Feedback can be sent to a retraining queue and influence future epochs (though less immediate than \gls{RL}).
+    \item \textbf{Objective 6:} Evaluated based on prediction accuracy and feature attention relevance; may suffer from cold start and data scarcity issues.
+\end{itemize}
+
+\paragraph{Pipeline}
+\paragraph{Architecture}
+
+\subsubsection{Rule-Augmented Decision Tree with Feedback Aggregation}
+A hybrid system combining static expert rules with a lightweight \gls{DTC}. 
+The rule engine pre-filters known benign or critical alert patterns before passing unknown or ambiguous cases to a \gls{DTM}. 
+Feedback is logged and reviewed in batch to update the rule base and retrain the decision tree periodically.
+
+\textbf{Notes for later:}
+\begin{itemize}
+    \item \textbf{Objective 2:} Incorporates domain knowledge (rules) with a basic \gls{ML} model, reducing complexity while offering interpretability.
+    \item \textbf{Objective 3:} Relies on a clean and segmented dataset to distinguish known from unknown patterns.
+    \item \textbf{Objective 4:} Integrated with \gls{SIEM} for real-time alert tagging and rule matching before \gls{ML} classification.
+    \item \textbf{Objective 5:} Feedback is collected but applied asynchronously (e.g., weekly retraining and rule review).
+    \item \textbf{Objective 6:} Effective for low-volume environments; easily auditable but less dynamic in response to new threats.
+\end{itemize}
+
+\paragraph{Pipeline}
+\paragraph{Architecture}
 
 %----------------------------------------------------------------------------------------
+
+\subsection{Comparative Analysis}
+This subsection presents a comparison of the three proposed approaches based on key evaluation criteria. 
+The goal is to assess their suitability in the context of a real-world SOC environment, taking into consideration implementation complexity, adaptability, performance, interpretability, and integration potential.
+
+\captionsetup[table]{font=small} % Set the caption font size
+\scriptsize % Reduce the font size for the table content
+\begin{longtable}{@{}P{3cm}P{3cm}P{4cm}P{4cm}@{}}
+    \caption{Comparison of Proposed Solutions}
+    \label{tab:solution_comparison} \\
+    \toprule
+    \textbf{Criteria} & \textbf{\gls{RF} + \gls{RL}} & \textbf{\gls{DNN}} & \textbf{Rules + Decision Tree} \\
+    \midrule
+    \endfirsthead
+
+    \toprule
+    \textbf{Criteria} & \textbf{\gls{RF} + \gls{RL}} & \textbf{\gls{DNN}} & \textbf{Rules + Decision Tree} \\
+    \midrule
+    \endhead
+
+    \bottomrule
+    \endfoot
+
+    \bottomrule
+    \endlastfoot
+
+    Architecture Type & \gls{RF} + \gls{RL} (Two-layer) & \gls{DNN} & Rule-based + Decision Tree \\
+    \vspace{0.2cm}
+    Implementation Complexity & Moderate & High & Low \\
+    \vspace{0.2cm}
+    Adaptability to New Threats & High (via \gls{RL}) & Moderate (via retraining) & Low (manual updates) \\
+    \vspace{0.2cm}
+    Learning from Feedback & Online (via \gls{RL}) & Periodic retraining & Batch/manual integration \\
+    \vspace{0.2cm}
+    Cold Start Handling & Excellent (\gls{RF} pre-trained) & Poor & Excellent (rules pre-set) \\
+    \vspace{0.2cm}
+    Interpretability & Moderate & Low & High \\
+    \vspace{0.2cm}
+    Scalability & High & High & Moderate \\
+    \vspace{0.2cm}
+    Integration with SIEM (IBM SOAR) & Easy & Easy & Easy \\
+    \vspace{0.2cm}
+    False Positive Reduction & Adaptive (confidence scoring) & Model confidence only & Rigid (rule-defined) \\
+    \vspace{0.2cm}
+    Performance in Evolving Scenarios & High & Moderate & Low \\
+    
+\end{longtable}
+
+\normalsize
+
+\textbf{Notes for Analysis:}
+\begin{itemize}
+    \item \textbf{Solution 1} stands out by combining the stability and maturity of \gls{RF} with the adaptability and feedback-driven refinement of \gls{RL}.
+    \item Its \textit{cold start} advantage means it can be deployed immediately, using \gls{RF} predictions while the \gls{RL} model adapts gradually.
+    \item It offers a built-in mechanism for minimizing false positives via the \gls{RL} layer, which adjusts the \gls{RF} output and adds a confidence score.
+    \item Although Solution 2 is theoretically powerful, it requires extensive data, compute, and time to reach maturity—posing risks in production environments.
+    \item Solution 3 is simple and interpretable but lacks the adaptability and intelligence needed for dynamic cybersecurity environments, relying too heavily on static rules.
+    \item Considering the requirements of real-time alert classification, feedback learning, and SOC integration, Solution 1 offers the best balance of robustness, scalability, and long-term adaptability.
+\end{itemize}
+
+
+\section{Proof of Concept}
+This section presents the practical implementation of the proposed solution, including the setup of the test environment, preparation of the dataset, and execution of the machine learning models. It aims to demonstrate the feasibility and performance of the selected approach under realistic conditions.
+
+\subsection{Dataset Division}
+This subsection details how the dataset was split for training, validation, and testing.
+
+\subsection{Data Processing}
+Explanation of how the raw data was prepared for use in the machine learning pipeline.
+
+\subsection{Data Normalization}
+Discussion of normalization techniques applied to the data to improve model performance.
+
+\subsection{Machine Learning Model Development}
+In this section, the implementation of selected machine learning algorithms is discussed.
+
+\subsection{Hyperparameter Tuning}
+Details of the strategy used to tune hyperparameters and optimize the models' performance.
