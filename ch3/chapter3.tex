@@ -36,30 +36,39 @@ The first solution proposed in this study is a two-layered machine learning syst
 
 This solution addresses the problem using a pre-trained RF model on historical data combined with an RL model that refines predictions based on analyst feedback.
 
-\paragraph{Design}
+\paragraph{Design} 
 
-This solution uses two models: the Random Forest and Reinforcement Learning models. 
-The RF model serves as the decision-making core, trained on a historical dataset of security alerts  - Objective 3 - to classify incoming alerts by taxonomy and priority.
+The RF model serves as the decision-making core, trained on a historical dataset of security alerts to classify incoming alerts by taxonomy and priority—\hyperref[objective3]{Objective 3}.
 
 While the RF model provides strong initial predictions, it struggles to adapt to new attack vectors not represented in its training data. 
 To address this, the RL model enhances the predictions made by the RF model and evaluates alerts as false positives or true positives, using feedback from security analysts.
 
-The RL model adjusts its parameters through a continuous feedback loop, improving classification and generating confidence scores. 
-This dynamic learning process ensures the system evolves with the ever-changing cybersecurity landscape.
+Key features of this solution include:
 
-This ongoing learning enhances the system's accuracy, particularly in handling edge cases and evolving threats.
+\begin{itemize}
+    \item The RL model adjusts its parameters through a continuous feedback loop, improving classification and generating confidence scores.
+    \item This dynamic learning process ensures the system evolves with the ever-changing cybersecurity landscape.
+    \item The system's adaptability helps manage false positives by learning patterns of false positives or true positives, refining its algorithms, and potentially reducing analysts' workloads.
+    \item Designed to efficiently manage and analyze real-time alerts generated from a diverse range of log sources—\hyperref[objective4]{Objective 4}.
+\end{itemize}
 
-Additionally, the system's adaptability helps manage false positives. As the RL model learns to identify patterns of false positives or true positives, it refines its algorithms, potentially reducing analysts' workloads.
+Integrating with IBM SOAR is vital for enhancing the overall effectiveness of the solution—\hyperref[objective5]{Objective 5}. 
 
-This solution is designed to efficiently manage and analyze real-time alerts generated from a diverse range of log sources—Objective 4.
+IBM SOAR provides customization of dashboards presented to analysts, enabling:
 
-Integrating the proposed solution with IBM SOAR is essential for maximizing its effectiveness—Objective 5. 
+\begin{itemize}
+    \item Creation of custom fields where analysts can view the solution's outputs and mark them as correct or incorrect.
+    \item Feedback from analysts, which is crucial for the RL model to learn from mistakes and improve over time.
+\end{itemize}
 
-IBM SOAR provides customization of the dashboards presented to analysts, so by leveraging this functionality, custom fields can be created where the analysts will see the solution's outputs and be able to mark them as correct or incorrect, thus giving feedback back to the RL model.
+This feedback loop supports continuous refinement and enhances accuracy for future predictions. 
+Overall, this strategy leverages the strengths of supervised and reinforcement learning to create a robust solution for security alert triage. 
+It enhances operational efficiency and threat response capabilities by:
 
-This feedback is crucial for the RL model, as it learns from mistakes and improves over time, supporting continuous refinement and enhancing accuracy for future predictions.
-
-Overall, this strategy leverages the strengths of supervised and reinforcement learning to create a robust solution for security alert triage. It enhances operational efficiency and threat response capabilities by minimizing false positives through continuous improvement, and with the IBM SOAR integration it will be possible to evaluate and test this solution to assess its effectiveness in categorizing alerts and minimizing false positives—Objective 6.
+\begin{itemize}
+    \item Minimizing false positives through continuous improvement.
+    \item Allowing integration with IBM SOAR to evaluate and test the solution's effectiveness in categorizing alerts and minimizing false positives—\hyperref[objective6]{Objective 6}.
+\end{itemize}
 
 \begin{figure}[h]
     \centering
@@ -70,17 +79,15 @@ Overall, this strategy leverages the strengths of supervised and reinforcement l
 
 \paragraph{Pipeline}
 
-Figure~\ref{fig:solution1_pipeline} illustrates the data processing pipeline for this solution. 
+Figure~\ref{fig:solution1_pipeline} represents the data processing pipeline for this solution, which includes several key stages:
 
-The system begins by ingesting raw security alert data, which is first passed through a pre-processing stage responsible for cleaning, normalizing, and extracting relevant features. 
-
-The processed data is then fed into a pre-trained \gls{RF} model, which generates an initial prediction regarding the alert's taxonomy and priority. 
-
-This prediction is subsequently refined by a \gls{RL} model that incorporates analyst feedback to adjust the output and assign a confidence score. 
-
-The final prediction, including taxonomy, priority, false positive and confidence level, is displayed in the IBM SOAR analyst dashboard. 
-
-Analysts can provide feedback on each prediction, which is looped back to the \gls{RL} model, enabling it to continuously learn and adapt to evolving threats and improve classification accuracy over time.
+\begin{itemize}
+    \item Raw security alert data is ingested and preprocessed for cleaning and feature extraction.
+    \item A pre-trained RF model generates initial predictions on alert taxonomy and priority.
+    \item A RL model refines these predictions using analyst feedback.
+    \item The IBM SOAR analyst dashboard displays final predictions, including taxonomy, priority, false positive status, and confidence level.
+    \item Analyst feedback is looped back to the RL model to improve classification accuracy over time.
+\end{itemize}
 
 \begin{figure}[h!]
     \centering
@@ -91,9 +98,7 @@ Analysts can provide feedback on each prediction, which is looped back to the \g
 
 \paragraph{Architecture}
 
-The diagram in Figure~\ref{fig:solution1_architecture} illustrates the architecture of the \gls{RF} system with a \gls{RL} feedback loop solution designed for the classification of security alerts in a SOC environment.
-
-The architecture is organized into three major sections:
+The diagram in Figure~\ref{fig:solution1_architecture} illustrates the architecture. It's organized into three major sections:
 
 \begin{enumerate}
     \item \textbf{Analyst Device}: This device acts as the point of interaction where security analysts review and manage alerts. Represents the user interface. The analyst logs into the system through the \textbf{Authentication} component, enabling access to the dashboard.
