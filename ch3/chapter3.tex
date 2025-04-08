@@ -8,7 +8,6 @@ It consists of two sections: the first describes the method's design and propose
 
 \section{Method}
 This section describes the methodological foundation of the project. 
-
 It begins by presenting the technologies used and continues with an outline of three distinct solution strategies to the problem. 
 
 Each approach is described through its pipeline and architectural design, offering a comparative view of possible solutions.
@@ -19,22 +18,55 @@ The solution will be developed and implemented using the Python programming lang
 The following libraries are expected to be used throughout the development of the project:
 
 \begin{itemize}
-    \item \textbf{scikit-learn} (version 1.6.1): Machine learning models, including the Random Forest model and other necessary machine learning functionalities.
-    \item \textbf{pandas} (version 2.2.3): Data manipulation and analysis, particularly for handling and processing alert datasets.
-    \item \textbf{fastapi} (version 0.115.11): Building API, which will be used to expose endpoints for the system.
-    \item \textbf{matplotlib} (version 3.10.1): Generating plots and graphs, particularly for data exploration or model evaluation.
-    \item \textbf{SentenceTransformer} (likely needed): Text vectorization, particularly for converting text data into numerical embeddings.
+    \item \textbf{scikit-learn} (version 1.6.1): This library will be used for building machine learning models, including the Random Forest model. It provides necessary functionalities for model training, testing, and performance evaluation.
+    
+    \item \textbf{pandas} (version 2.2.3): Pandas will be used for data manipulation and analysis, particularly for handling, processing, and cleaning the alert datasets. It provides efficient data structures for handling large amounts of structured data.
+
+    \item \textbf{fastapi} (version 0.115.11): FastAPI will be used to create the necessary APIs for data flow between the components. It will expose endpoints for the system, allowing real-time predictions and feedback from analysts to be communicated between the machine learning models and the IBM SOAR interface.
+
+    \item \textbf{matplotlib} (version 3.10.1): Matplotlib will be used to generate plots and graphs, particularly for data exploration, visualizing model performance, and evaluating results. It will assist in identifying patterns in the data and understanding how well the model is classifying the security alerts.
+
+    \item \textbf{SentenceTransformer} (likely needed): SentenceTransformer will be used for text vectorization, particularly for converting textual data such as alert descriptions and analyst comments into numerical embeddings. These embeddings will be used as inputs to machine learning models for better understanding and classification of textual data.
+
 \end{itemize}
+
 
 \subsection{Problem-Solving Approaches}
 This subsection analyzes three distinct approaches to tackling the identified problem. 
 It outlines the specific methodologies employed for each approach, detailing the pipeline process involved and the architectural framework that supports its implementation.
+
+\paragraph{Pipeline}
+
+Figure~\ref{fig:general_solution_pipeline} represents the general data processing pipeline for all solutions, illustrating the flow of data through various stages before it reaches the analyst. 
+
+The pipeline is designed to handle security alerts from multiple sources, process the data, and present the predictions to the analyst.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=\textwidth]{ch3/assets/general_solution_pipeline.png}
+    \caption{General Pipeline for all Three Solutions}
+    \label{fig:general_solution_pipeline}
+\end{figure}
+
+This pipeline remains largely the same across all solutions, with the exception of section \texttt{C}, where the machine learning model varies depending on the solution. 
+While the overall structure of the pipeline is consistent, the type of model used in section \texttt{C} determines the specific prediction process and outputs.
+
+The described pipeline includes several key stages:
+\begin{itemize}
+    \item \textbf{Raw security alert data ingestion:} In section \texttt{A}, alert data is collected from various log sources, such as SIEM systems, IDS, and firewalls. This data typically contains a wide range of information, including alert descriptions, timestamps, and metadata. In this section, the data is prepared for processing by standardizing the format across different sources.
+    \item \textbf{Data pre-processing:} In section \texttt{B}, the collected data undergoes a series of cleaning and normalization procedures. This stage includes feature extraction, where relevant information from the raw data is transformed into structured, usable features.
+    \item \textbf{Machine Learning Model (specific to each solution):} Section \texttt{C} involves feeding the pre-processed data into the machine learning model. The core of this section differs depending on the solution.
+    \item \textbf{Final predictions for the analyst dashboard:} After the predictions are generated in section \texttt{C}, the results are passed on to the IBM SOAR dashboard, section \texttt{D}. This dashboard presents the predictions to the analyst, who can review the outputs, including taxonomy, priority, false positive status, and confidence score. The analyst can provide feedback on these predictions, which is sent back into the system to refine future predictions, contributing to the model's long-term accuracy and adaptability.
+\end{itemize}
+
+This pipeline was designed to be modular and flexible, allowing for easy integration with existing systems and the ability to adapt to evolving security threats.
 
 \subsubsection{Random Forest with Reinforcement Learning Feedback Loop}
 
 The first solution proposed in this study is a two-layered machine learning system that integrates a Random Forest model with a Reinforcement Learning feedback loop. 
 
 This solution addresses the problem using a pre-trained RF model on historical data combined with an RL model that refines predictions based on analyst feedback.
+This integration of \underline{RF with RL} contributes to the model's adaptability, making it highly responsive to new threats.
 
 \paragraph{Design} 
 
@@ -43,16 +75,25 @@ The RF model serves as the decision-making core, trained on a historical dataset
 While the RF model provides strong initial predictions, it struggles to adapt to new attack vectors not represented in its training data. 
 To address this, the RL model enhances the predictions made by the RF model and evaluates alerts as false positives or true positives, using feedback from security analysts.
 
-Key features of this solution include:
+The \underline{implementation complexity} of this solution is considered \underline{moderate}, as it does not involve highly intricate algorithms or architectures. 
+However, the necessity to implement and integrate two distinct models—a RF for initial predictions and a RL model for feedback-driven refinement—adds an additional layer of complexity. 
 
+Key features of this solution include:
 \begin{itemize}
     \item The RL model adjusts its parameters through a continuous feedback loop, improving classification and generating confidence scores.
-    \item This dynamic learning process ensures the system evolves with the ever-changing cybersecurity landscape.
-    \item The system's adaptability helps manage false positives by learning patterns of false positives or true positives, refining its algorithms, and potentially reducing analysts' workloads.
+    \item This dynamic learning process ensures the system is able to handle both \underline{\texttt{cold start}} issues effectively (thanks to the pre-trained RF model) and false positives in real-time.
+    \item The system's \underline{adaptability} to new threats is \underline{high via the RL model} and helps manage false positives by learning patterns of false positives or true positives, refining its algorithms, and potentially reducing analysts' workloads.
     \item Designed to efficiently manage and analyze real-time alerts generated from a diverse range of log sources—\hyperref[objective4]{Objective 4}.
 \end{itemize}
 
-Integrating with IBM SOAR is vital for enhancing the overall effectiveness of the solution—\hyperref[objective5]{Objective 5}. 
+The \underline{interpretability} of this solution is considered \underline{moderate} due to the significant role played by AI in its decision-making processes. 
+The RF model, being a supervised learning algorithm, provides a level of transparency as its outputs can be traced back to the quality and features of the historical dataset used for training. 
+
+However, integrating RL complicates interpretability. RL's iterative feedback and rewards lead to less transparent reasoning, making analyzing and communicating insights challenging.
+
+Integrating this solution with \underline{IBM SOAR} is relatively \underline{easy and straightforward}. 
+By relying on the API endpoints provided by this solution, IBM SOAR can seamlessly communicate with the solution platform.
+This is vital for enhancing the overall effectiveness of the solution—\hyperref[objective5]{Objective 5}. 
 
 IBM SOAR provides customization of dashboards presented to analysts, enabling:
 
@@ -70,40 +111,111 @@ It enhances operational efficiency and threat response capabilities by:
     \item Allowing integration with IBM SOAR to evaluate and test the solution's effectiveness in categorizing alerts and minimizing false positives—\hyperref[objective6]{Objective 6}.
 \end{itemize}
 
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=\textwidth]{ch3/assets/solution1_pipeline.png}
-    \caption{Pipeline of the Random Forest with Reinforcement Learning Feedback Loop Solution}
-    \label{fig:solution1_pipeline}
-\end{figure}
+\paragraph{Pipeline} 
 
-\paragraph{Pipeline}
-
-Figure~\ref{fig:solution1_pipeline} represents the data processing pipeline for this solution, which includes several key stages:
-
-\begin{itemize}
-    \item Raw security alert data is ingested and preprocessed for cleaning and feature extraction.
-    \item A pre-trained RF model generates initial predictions on alert taxonomy and priority.
-    \item A RL model refines these predictions using analyst feedback.
-    \item The IBM SOAR analyst dashboard displays final predictions, including taxonomy, priority, false positive status, and confidence level.
-    \item Analyst feedback is looped back to the RL model to improve classification accuracy over time.
-\end{itemize}
+The illustration in Figure~\ref{fig:solution1_c} corresponds to section \texttt{C} of the general pipeline in Figure~\ref{fig:general_solution_pipeline}. 
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=\textwidth]{ch3/assets/Soltution1_Archquiteture.png}
-    \caption{Architecture of the Random Forest with Reinforcement Learning Feedback Loop Solution}
-    \label{fig:solution1_architecture}
+    \includegraphics[width=0.5\textwidth]{ch3/assets/solution1_C.png}
+    \caption{Part C of the General Pipeline for the Random Forest with Reinforcement Learning Feedback Loop Solution}
+    \label{fig:solution1_c}
 \end{figure}
 
-\paragraph{Architecture}
+This figure provides a detailed representation of the machine learning model's specific implementation for this solution. 
 
-The diagram in Figure~\ref{fig:solution1_architecture} illustrates the architecture. It's organized into three major sections:
+It elaborates on the processes and components that occur within section \texttt{C}, as outlined in the general pipeline, showcasing the unique aspects of this solution's approach to data processing and prediction generation.
 
+\subsubsection{End-to-End Deep Learning Classifier with Feature Fusion}
+The second solution in this study employs a deep neural network (DNN) model trained end-to-end on labeled security alert data, based on historical alerts dataset—\hyperref[objective3]{Objective 3}. 
+
+Unlike solution one, which uses a pre-trained RF model, this approach processes raw SIEM logs, analyst comments, and metadata through the DNN's attention layers to automatically extract features and classify data, eliminating the need for manual feature engineering.
+
+While solution one adapts to new threats with a reinforcement learning feedback loop, solution two relies solely on the DNN model, necessitating training on a comprehensive dataset before deployment. 
+The DNN excels in complex feature extraction environments but requires periodic retraining based on analyst feedback.
+
+\paragraph{Design}
+
+In this solution, the \underline{DNN model} processes raw security alert data directly, leveraging attention mechanisms to identify and prioritize critical features like alert descriptions, origins, and metadata. 
+
+The attention layers enhance the model's ability to focus on relevant patterns, improving classification accuracy and adaptability. 
+
+By automating feature extraction, this approach streamlines the pipeline, reducing dependency on domain-specific preprocessing techniques.
+
+Key aspects of this solution are:
+\begin{itemize}
+    \item The DNN model takes in raw security alert data, which is vectorized, and outputs predictions on alert taxonomy, priority, false positive status, and confidence score.
+    \item The DNN model's \underline{adaptability} is \underline{moderate} and depends on the training data's quality and diversity. Once trained, it performs well on known data but is less responsive to new attack patterns unless retrained with fresh data.
+    \item Solution two faces challenges with cold start problems, as the DNN model requires a substantial amount of labeled training data before it can begin making accurate predictions. Unlike solution one, which benefits from the pre-trained RF model, this solution requires extensive training before it can function effectively.
+    \item Engineered to effectively process and evaluate real-time alerts originating from a wide variety of log sources—\hyperref[objective4]{Objective 4}.
+\end{itemize}
+
+The \underline{implementation complexity} of solution two is considered \underline{high} due to the extensive computational resources required to train the DNN model. 
+Training a deep neural network, especially one that handles raw alert data with attention mechanisms, demands significant time and resources, making it more complex to implement.
+
+The \underline{interpretability} of the solution is \underline{low}, primarily because the DNN model operates as a "black box". 
+While it offers powerful predictions, the model's inner workings are difficult to explain, particularly when attention layers are involved, making it harder to interpret why certain predictions were made.
+
+This solution integrates with IBM SOAR for real-time feedback and performance evaluation—\hyperref[objective5]{Objective 5}, allowing analysts to review predictions and provide feedback, which is subsequently used for periodic retraining to assess and validate the solution's capability in classifying alerts and reducing the occurrence of false positives—\hyperref[objective6]{Objective 6}.
+
+\subsubsection{Rule-Augmented Decision Tree with Feedback Aggregation}
+
+The third solution proposed in this study integrates static expert rules with a lightweight \underline{\gls{DTC}}. 
+This hybrid system uses a rule engine to pre-filter known benign or critical alert patterns before passing any unknown or ambiguous cases to the \underline{\gls{DTM}}. 
+
+The rules provide initial filtering for quick decisions on clear alerts. For complex cases, the DTC predicts based on available data. 
+Feedback is reviewed in batches, enabling periodic updates to the rule base and retraining of the decision tree.
+
+\paragraph{Design}
+
+This solution combines the benefits of domain-specific rules with machine learning.
+It starts with a rule engine that quickly processes alerts based on known patterns, tagging them as benign or critical and minimizing the need for further analysis. 
+This approach is efficient in environments with well-defined, static patterns. 
+This solution will be designed to ingest data from a variety of log sources, including SIEM systems and other security tools—\hyperref[objective4]{Objective 4}.
+
+The rule engine will preprocess and filter alerts from these sources, leveraging predefined rules to handle known patterns efficiently, while less adaptive, predefined rules to filter known benign patterns, ensuring a baseline reduction in false positives. 
+
+For alerts that don't fit predefined rules, the DTC classifies them using features from raw data, allowing the system to manage both known and unknown patterns while balancing interpretability and accuracy. 
+
+The DTC works with a clean, segmented dataset to differentiate between alerts that match known patterns and those requiring further analysis—\hyperref[objective3]{Objective 3}.
+
+Key features of this solution include:
+\begin{itemize}
+    \item The rule engine filters known benign or critical patterns before passing uncertain alerts to the DTC. This approach reduces the overall processing time and helps prioritize more ambiguous cases.
+    \item \underline{Feedback} is logged and applied asynchronously, meaning that the system doesn't update in real-time. Instead, the rule base is updated, and the decision tree is retrained on a \underline{periodic basis (e.g., weekly)}. This ensures that the system evolves over time but does not immediately adjust to new threats in real-time.
+    \item The system's ability to \underline{handle new and evolving threats} is \underline{low}, as it depends on manually updating the rule base to address new threats.
+    \item \underline{\textit{Cold start}} handling is excellent because the rules-based filtering system can operate immediately without requiring training, and the DTC is lightweight enough to be quickly deployed after the initial setup.
+\end{itemize}
+
+The \underline{implementation complexity} of this solution is \underline{low}, as it uses well-understood decision tree models and a simple rule engine. 
+This makes it relatively \underline{easy to implement} when compared to the other solutions. 
+However, the trade-off is that the DTC may not be as powerful as deep learning-based models or even RL models when dealing with complex, high-dimensional data.
+
+The \underline{interpretability} of this solution is considered \underline{high}. 
+Both the rule engine and the decision tree are inherently interpretable, allowing analysts to understand the reasoning behind the classifications. 
+This makes it particularly useful in environments where auditability and transparency are important. 
+However, the model's inability to \underline{adapt} in real-time can make it \underline{less suitable} for \underline{rapidly evolving attack patterns}.
+
+Integrating this solution with \underline{IBM SOAR} is \underline{straightforward}, allowing for seamless communication between the alert system and the dashboard used by analysts. 
+Alerts classified by the rule engine and decision tree are sent to the IBM SOAR dashboard, where analysts can review predictions and provide feedback—\hyperref[objective5]{Objective 5}.
+The feedback is stored and reviewed periodically to refine the rules and retrain the decision tree. 
+
+\subsubsection{Architecture}
+
+The diagram in Figure~\ref{fig:architecture} illustrates the architecture for all solutions.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=\textwidth]{ch3/assets/archquiteture.png}
+    \caption{Architecture of the Random Forest with Reinforcement Learning Feedback Loop Solution}
+    \label{fig:architecture}
+\end{figure}
+
+It's organized into three major sections:
 \begin{enumerate}
     \item \textbf{Analyst Device}: This device acts as the point of interaction where security analysts review and manage alerts. Represents the user interface. The analyst logs into the system through the \textbf{Authentication} component, enabling access to the dashboard.
     
-    \item \textbf{IBM SOAR Server}: The IBM SOAR Server is the central system for managing security alerts. The server sends requests to the \textbf{Bot Container} through the \texttt{/predict} endpoint, triggering the alert classification process. Once the alert is processed, the \texttt{/feedback} endpoint is used to receive the analyst's input for further training of the RL model.
+    \item \textbf{IBM SOAR Server}: The IBM SOAR Server is the central system for managing security alerts. The server sends requests to the \textbf{Bot Container} through the \texttt{\textbackslash predict} endpoint, triggering the alert classification process. Once the alert is processed, the \texttt{\textbackslash feedback} endpoint is used to receive the analyst's input for further training of the RL model.
     
     \item \textbf{Dedicated Company Server}: The \textbf{Dedicated Company Server} hosts the \textbf{Bot Container}, which is deployed on a \textbf{Virtual Machine (VM)}. This container is responsible for the core functionality of the solution, consisting of three main components:
     \begin{itemize}
@@ -115,44 +227,11 @@ The diagram in Figure~\ref{fig:solution1_architecture} illustrates the architect
 
 This architecture is designed to be modular and scalable, allowing for easy integration with existing systems and the ability to adapt to evolving security threats.
 
-\subsubsection{End-to-End Deep Learning Classifier with Feature Fusion}
-A single \gls{DNN} trained end-to-end on labeled security alert data. 
-It ingests enriched alert features that include raw SIEM logs, analyst comments, and metadata, using attention-based layers to identify the most relevant features. 
-This model is deployed directly to make predictions and confidence scores in real time.
-
-\textbf{Notes for later:}
-\begin{itemize}
-    \item \textbf{Objective 2:} Uses a \gls{DLM} that differs from classical \gls{ML}, designed to learn feature importance and complex relationships natively.
-    \item \textbf{Objective 3:} Requires a well-labeled and feature-rich dataset, including alert content, origin, severity, and manual annotations.
-    \item \textbf{Objective 4:} Connected to \gls{SIEM} for live alert feed; the model automatically classifies alerts in real time.
-    \item \textbf{Objective 5:} Feedback can be sent to a retraining queue and influence future epochs (though less immediate than \gls{RL}).
-    \item \textbf{Objective 6:} Evaluated based on prediction accuracy and feature attention relevance; may suffer from cold start and data scarcity issues.
-\end{itemize}
-
-\paragraph{Pipeline}
-\paragraph{Architecture}
-
-\subsubsection{Rule-Augmented Decision Tree with Feedback Aggregation}
-A hybrid system combining static expert rules with a lightweight \gls{DTC}. 
-The rule engine pre-filters known benign or critical alert patterns before passing unknown or ambiguous cases to a \gls{DTM}. 
-Feedback is logged and reviewed in batch to update the rule base and retrain the decision tree periodically.
-
-\textbf{Notes for later:}
-\begin{itemize}
-    \item \textbf{Objective 2:} Incorporates domain knowledge (rules) with a basic \gls{ML} model, reducing complexity while offering interpretability.
-    \item \textbf{Objective 3:} Relies on a clean and segmented dataset to distinguish known from unknown patterns.
-    \item \textbf{Objective 4:} Integrated with \gls{SIEM} for real-time alert tagging and rule matching before \gls{ML} classification.
-    \item \textbf{Objective 5:} Feedback is collected but applied asynchronously (e.g., weekly retraining and rule review).
-    \item \textbf{Objective 6:} Effective for low-volume environments; easily auditable but less dynamic in response to new threats.
-\end{itemize}
-
-\paragraph{Pipeline}
-\paragraph{Architecture}
 
 %----------------------------------------------------------------------------------------
 
 \subsection{Comparative Analysis}
-This subsection presents a comparison of the three proposed approaches based on key evaluation criteria. 
+Table~\ref{tab:solution_comparison} presents a comparison of the three proposed approaches based on key evaluation criteria. 
 The goal is to assess their suitability in the context of a real-world SOC environment, taking into consideration implementation complexity, adaptability, performance, interpretability, and integration potential.
 
 \captionsetup[table]{font=small} % Set the caption font size
@@ -200,16 +279,55 @@ The goal is to assess their suitability in the context of a real-world SOC envir
 
 \normalsize
 
-\textbf{Notes for Analysis:}
-\begin{itemize}
-    \item \textbf{Solution 1} stands out by combining the stability and maturity of \gls{RF} with the adaptability and feedback-driven refinement of \gls{RL}.
-    \item Its \textit{cold start} advantage means it can be deployed immediately, using \gls{RF} predictions while the \gls{RL} model adapts gradually.
-    \item It offers a built-in mechanism for minimizing false positives via the \gls{RL} layer, which adjusts the \gls{RF} output and adds a confidence score.
-    \item Although Solution 2 is theoretically powerful, it requires extensive data, compute, and time to reach maturity—posing risks in production environments.
-    \item Solution 3 is simple and interpretable but lacks the adaptability and intelligence needed for dynamic cybersecurity environments, relying too heavily on static rules.
-    \item Considering the requirements of real-time alert classification, feedback learning, and SOC integration, Solution 1 offers the best balance of robustness, scalability, and long-term adaptability.
-\end{itemize}
+% \textbf{Solution 1} combines RF with RL, offering a highly adaptable system that continuously improves its performance over time. 
+% The integration of RF for initial predictions and RL for feedback-based adjustments allows the system to react to evolving cybersecurity threats.
 
+% \begin{itemize}
+%     \item The implementation complexity is moderate, as integrating two models (RF and RL) requires careful setup but remains manageable with existing frameworks like scikit-learn and RLlib.
+%     \item High adaptability, as the RL model continuously adjusts based on analyst feedback. The system can handle new attack patterns without requiring manual updates, making it effective in dynamic environments.
+%     \item This solution uses online learning through the RL feedback loop, which means feedback from analysts is immediately integrated into the model, refining its predictions in real-time.
+%     \item Excellent cold start handling, thanks to the pre-trained RF model. This allows the system to make predictions right away, with the RL model improving its performance gradually over time.
+%     \item Moderate interpretability due to the transparency of the RF model, but the integration of RL adds complexity, making it harder to explain the decision-making process.
+%     \item High performance in evolving scenarios, as the RL model adapts in real-time to new data, making it well-suited for fast-changing threat landscapes.
+% \end{itemize}
+
+% \textbf{Solution 2} uses a DNN that processes raw alert data through attention mechanisms to automatically extract features and classify alerts. 
+% Unlike \textbf{Solution 1}, it doesn't use RL for real-time feedback but relies on periodic retraining to improve performance.
+
+% \begin{itemize}
+%     \item High implementation complexity because training a DNN requires substantial computational resources and time, especially when handling raw data with attention mechanisms. This makes it more complex to implement compared to \textbf{Solution 1}.
+%     \item Moderate adaptability. The DNN model learns from feedback, but it does so through periodic retraining. It doesn't adjust in real-time like \textbf{Solution 1}, making it less responsive to new threats immediately after they emerge.
+%     \item Feedback is applied during periodic retraining. This means the model improves over time but is slower to adapt compared to \textbf{Solution 1}, which has real-time learning through RL.
+%     \item Poor cold start handling. The DNN model requires a significant amount of labeled data to be trained before it can start making reliable predictions. It cannot provide immediate predictions like \textbf{Solution 1}.
+%     \item Low interpretability. DNN models are often considered “black boxes,” making it difficult to explain how certain predictions were made, especially when attention mechanisms are involved.
+%     \item Moderate performance. While the DNN is effective on known data, it needs retraining to adjust to new, unseen patterns, making it less suited for dynamic cybersecurity environments compared to \textbf{Solution 1}.
+% \end{itemize}
+
+% \textbf{Solution 3} integrates static expert rules with a lightweight DTC. 
+% The rule engine filters known patterns, while the DTC handles ambiguous or unknown cases. 
+% Feedback is aggregated and applied periodically to retrain the decision tree and refine the rules.
+
+% \begin{itemize}
+%     \item Low implementation complexity. The system is built with simple decision tree algorithms and rule-based filtering, making it easier to implement compared to the more complex \textbf{Solution 1} and \textbf{Solution 2}.
+%     \item Low adaptability. The system relies on manual updates to the rules base to address new attack vectors. It is not capable of real-time adjustments like \textbf{Solution 1}.
+%     \item Feedback is applied asynchronously. The system doesn't adjust in real-time but instead uses periodic feedback to update the rules and retrain the decision tree. This makes it slower to improve and adapt to changing threats.
+%     \item Excellent cold start handling. The rules-based system can immediately classify alerts based on predefined patterns, and the DTC can be deployed quickly without extensive data preparation.
+%     \item High interpretability. Both the rule engine and DTC are transparent, allowing security analysts to easily understand the rationale behind decisions. This is a major advantage in environments that require auditing and explainability.
+%     \item Low performance in evolving scenarios. The system relies on static rules, which require manual updates to accommodate new threats. It is less flexible than \textbf{Solution 1} or \textbf{Solution 2}, making it less effective in rapidly changing cybersecurity environments.
+% \end{itemize}
+
+% \subsubsection{Overall Evaluation}
+
+Solution 1 is optimal because it offers adaptability, scalability, and real-time learning. 
+Integrating RF with RL continuously adapts to new threats through real-time feedback, making it highly effective in dynamic cybersecurity environments.
+
+Solution 2 excels in feature extraction using DNN but lacks immediate adaptability. 
+It requires periodic retraining, making it less responsive to evolving threats than Solution 1.
+
+Solution 3, while simple and interpretable, is not adaptable. 
+It relies on static rules and manual updates, making it less suitable for fast-changing threat landscapes.
+
+In conclusion, Solution 1 is the best option for real-time alert classification and long-term adaptability in a SOC environment.
 
 \section{Proof of Concept}
 This section presents the practical implementation of the proposed solution, including the setup of the test environment, preparation of the dataset, and execution of the machine learning models. It aims to demonstrate the feasibility and performance of the selected approach under realistic conditions.
