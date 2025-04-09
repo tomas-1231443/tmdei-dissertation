@@ -1,7 +1,7 @@
 $out_dir = 'build';
 $aux_dir = 'build';
 
-$pdflatex = 'pdflatex -interaction=nonstopmode %O %S';
+$pdflatex = 'pdflatex -shell-escape -interaction=nonstopmode %O %S';
 
 $pdf_previewer = "open -a Preview %S";
 

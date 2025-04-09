@@ -53,6 +53,17 @@ headsepline, % Uncomment to get a line under the header
 
 \usepackage{pdflscape} % Use pdflscape for rotated pages in PDF
 
+\usepackage{capt-of}
+\usepackage{minted}
+\usepackage{varwidth}
+
+\setminted{
+  frame=single,            % <-- Removes the box
+  linenos=true,         % <-- No line numbers
+  fontsize=\small,
+  breaklines=true
+}
+
 %
 % Next you have examples of admissable citation styles; we recomend using the authoryear-comp citation style (which resembles Harvard); don't forget to only uncomment one
 %
