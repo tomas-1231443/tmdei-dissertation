@@ -5,6 +5,7 @@ VERBOSE = False
 DEFAULT_MODEL_DIR = "src/models/"
 DEFAULT_EXCEL_PATH = "data/historical_alerts.csv"
 DEFAULT_CLEANED_ALERTS_PATH = "data/cleaned_alerts.csv"
+RL_AGENT_PATH = "src/models/rl_agent.zip"
 
 EXCEL_COLUMNS = [
     "Issue ID",

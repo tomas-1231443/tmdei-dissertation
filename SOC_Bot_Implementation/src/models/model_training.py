@@ -212,7 +212,7 @@ def train_rf_model(df: pd.DataFrame, tune: bool = False, *, logger) -> Dict[str,
     report += "Classification Report for Priority:\n" + classification_report(Y_test[:, 0], Y_pred[:, 0])
     report += "\nClassification Report for Taxonomy:\n" + classification_report(Y_test[:, 1], Y_pred[:, 1])
 
-    save_model(pipeline, version, report, priority_fig=fig_priority, taxonomy_fig=fig_taxonomy)
+    save_model(trained_model, version, report, priority_fig=fig_priority, taxonomy_fig=fig_taxonomy)
 
     logger.info("Training complete.")
 
@@ -353,8 +353,8 @@ def _tune_hyperparameters(X: np.array, Y: np.array, *, logger) -> dict:
     
     return {"pipeline": best_model, "best_params": best_params, "best_score": best_score}
 
-    
-def predict_alert(trained_model: dict, description: str) -> dict:
+@with_logger    
+def predict_alert(trained_model: dict, description: str, *, logger) -> dict:
     """
     Uses the trained model pipeline and label encoders to predict Priority and Taxonomy from a raw description.
     

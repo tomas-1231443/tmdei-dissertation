@@ -554,7 +554,220 @@ By properly dividing the dataset, this approach ensures that the model is traine
 This helps in achieving a balance between training the model effectively and ensuring generalization without overfitting or underfitting.
 
 \subsection{Machine Learning Model Development}
-In this section, the implementation of selected machine learning algorithms is discussed.
+This section describes the implementation of the RF model and the RL feedback loop, explaining how these models were integrated to complement each other and enhance prediction accuracy in the system.
+
+\subsubsection{Random Forest Model Implementation}
+
+The \textbf{RF model} is implemented using scikit-learn's \textbf{RandomForestClassifier}. 
+It is employed as the core decision-making component in the system, trained to predict two target variables: \textbf{priority} and \textbf{taxonomy} of security alerts. 
+To handle these \textbf{multi-output targets}, \textbf{MultiOutputClassifier} is used, which allows the model to make predictions on both target variables simultaneously.
+
+The first step in implementing the \textbf{RF model} is to transform the raw textual data in the \textbf{Description} column into numerical features. 
+This is achieved using \textbf{SentenceBertVectorizer}, a tool that leverages the \textbf{Sentence-BERT model} to generate embeddings from the alert descriptions. 
+These embeddings capture the \textbf{semantic meaning} of the descriptions, which is crucial for the model to make accurate predictions.
+
+\vspace{0.2cm}
+\noindent
+\begin{minipage}{\linewidth}
+\begin{minted}{python}
+vectorizer = SentenceBertVectorizer(model_name="paraphrase-MiniLM-L6-v2")
+X = vectorizer.fit_transform(df["Description"])
+\end{minted}
+\captionof{listing}{Vectorizing Text Data.}
+\label{lst:vectorizing_text_data}
+\end{minipage}
+\vspace{0.1cm}
+
+Once the text data is vectorized, the target labels (Priority and Taxonomy) are encoded using LabelEncoder. 
+This step converts the categorical labels into numeric form, making them suitable for input into the RF model.
+
+\vspace{0.2cm}
+\noindent
+\begin{minipage}{\linewidth}
+\begin{minted}{python}
+# Encode targets for Priority and Taxonomy
+le_priority = LabelEncoder()
+le_taxonomy = LabelEncoder()
+y_priority = le_priority.fit_transform(df["Priority"])
+y_taxonomy = le_taxonomy.fit_transform(df["Taxonomy"])
+
+# Combine the targets into a 2D array
+Y = np.column_stack((y_priority, y_taxonomy))
+\end{minted}
+\captionof{listing}{Encoding Target Labels.}
+\label{lst:encoding_target_labels}
+\end{minipage}
+\vspace{0.1cm}
+
+Next, the dataset is split into training and testing sets using train\_test\_split from scikit-learn. 
+This ensures that the model is trained on one subset of data and evaluated on another, providing an unbiased assessment of its performance.
+
+\vspace{0.2cm}
+\noindent
+\begin{minipage}{\linewidth}
+\begin{minted}{python}
+# Split the data into training and testing sets
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.3, random_state=42, stratify=Y)
+\end{minted}
+\captionof{listing}{Splitting the Dataset.}
+\label{lst:splitting_dataset}
+\end{minipage}
+\vspace{0.1cm}
+
+After splitting the data, the RandomForestClassifier is initialized and wrapped with MultiOutputClassifier to handle the multi-output prediction task. 
+The model is trained on the training data and evaluated on the test set. 
+
+\vspace{0.2cm}
+\noindent
+\begin{minipage}{\linewidth}
+\begin{minted}{python}
+# Train a MultiOutputClassifier using RandomForest
+base_rf = RandomForestClassifier(n_estimators=500, random_state=42, max_depth=40, min_samples_split=10)
+multi_rf = MultiOutputClassifier(base_rf)
+multi_rf.fit(X_train, Y_train)
+\end{minted}
+\captionof{listing}{Training the Random Forest Model.}
+\label{lst:training_rf_model}
+\end{minipage}
+\vspace{0.1cm}
+
+\subsubsection{Reinforcement Learning Model Implementation}
+
+While the RF model is capable of making initial predictions, it requires further refinement to adapt to new or unseen threats. 
+This is where the RL model comes in. The RL model is designed to improve predictions by incorporating feedback from security analysts.
+
+The RL model is built using the Proximal Policy Optimization (PPO) algorithm from Stable Baselines3, a popular library for RL. 
+The model's role is to adjust the predictions made by the RF model based on feedback received from analysts. 
+
+At the core of this RL model is a reward function that is based on whether the model's predictions are correct, focusing on both false positive (FP) and true positive (TP) predictions for taxonomy and priority. 
+The reward function is designed to penalize incorrect predictions and reward correct ones, with particular weight given to more critical mistakes.
+
+\paragraph{False Positive (FP) Evaluation}
+The third element of the action vector represents the \textbf{RL model's FP prediction}. 
+
+A positive reward is given if the model's FP prediction matches the ground truth, while a penalty is applied if the prediction is incorrect.
+
+\[
+R_{\text{FP}} = 
+\begin{cases} 
++ w_{\text{tp}} \cdot \text{confidence} & \text{if FP prediction is correct} \\
+- w_{\text{fn}} & \text{if predicted FP but true TP} \\
+- w_{\text{fp}} & \text{if predicted TP but true FP} \\
+\end{cases}
+\label{eq:fp_reward}
+\]
+
+\paragraph{Priority and Taxonomy Classification}
+The \textbf{priority} and \textbf{taxonomy} predictions are compared to the true values. A penalty is applied if either the priority or taxonomy prediction is incorrect.
+
+\[
+R_{\text{error}} = \alpha \cdot \text{priority\_error\_indicator} + \beta \cdot \text{taxonomy\_error\_indicator}
+\label{eq:error_penalty}
+\]
+
+\paragraph{Final Reward}
+The final reward is the sum of the FP evaluation and the error penalties for priority and taxonomy:
+
+\[
+R = R_{\text{FP}} - R_{\text{error}}
+\label{eq:final_reward}
+\]
+
+Where:
+\begin{itemize}
+    \item \( w_{\text{tp}} \) is the weight for true positives,
+    \item \( w_{\text{fn}} \) and \( w_{\text{fp}} \) are penalties for false negatives and false positives, respectively,
+    \item \( \alpha \) and \( \beta \) are the penalty weights for priority and taxonomy errors,
+    \item \textbf{confidence} is the model’s confidence in its FP prediction,
+    \item \textbf{priority\_error\_indicator} and \textbf{taxonomy\_error\_indicator} are binary values indicating whether the respective predictions are correct.
+\end{itemize}
+
+This reward function allows the RL model to adjust its predictions based on feedback, ensuring continuous improvement in the model's performance.
+
+The RL agent uses the above reward function to adjust its policy (i.e., how it makes predictions) based on the rewards it receives after each prediction. 
+The PPO algorithm ensures that policy updates are stable and efficient, making it well-suited for real-time systems.
+
+To manage computational load during training, the RL model is trained asynchronously using Celery, a distributed task queue. 
+Celery ensures that training tasks do not block other system operations, enabling the RL model to be trained in parallel with real-time alert classification.
+
+Here's an example of how the RL training task is defined using Celery:
+
+\vspace{0.2cm}
+\noindent
+\begin{minipage}{\linewidth}
+\begin{minted}{python}
+@celery_app.task
+def train_rl_agent_task(feedback, model_version):
+    dummy_env = RLDummyEnv(observation_dim=386)
+    rl_agent = PPO.load(src.config.RL_AGENT_PATH, env=dummy_env)
+
+    model = load_model(model_version)
+    result_info = update_rl_agent_with_feedback(feedback, model, rl_agent)
+    return result_info
+\end{minted}
+\captionof{listing}{RL Training Task with Celery.}
+\label{lst:rl_training_task}
+\end{minipage}
+\vspace{0.1cm}
+
+This asynchronous processing model allows the RL agent to continuously improve based on real-time feedback while ensuring that the system remains responsive to new alert data.
+Although, for this to happen the RL model need to be trained in a separate process to ensure efficient and uninterrupted training. 
+However, this separation means that the most recently trained version of the model is not immediately available to the main process responsible for making predictions. 
+
+To address this, the training process saves the model to persistent storage each time training is completed. 
+
+The main process, whenever it needs to use the RL model, checks if the model has been updated since the last time it was loaded. 
+If a newer version is detected, the main process reloads the model, ensuring that it always operates with the most up-to-date version of the RL model.
+This approach maintains consistency between training and inference while allowing both processes to function independently.
 
 \subsection{Hyperparameter Tuning}
-Details of the strategy used to tune hyperparameters and optimize the models' performance.
+
+In the process of model development, hyperparameter tuning was performed for both the \gls{RF} and \gls{RL} models to optimize their performance. 
+
+The primary goal of hyperparameter tuning is to find the best configuration of hyperparameters that allows the models to generalize well to unseen data, reducing the risk of overfitting while maintaining high predictive accuracy.
+
+For the \gls{RF} model, tests were run using a \texttt{GridSearchCV} approach to explore a range of hyperparameters. 
+However, after extensive testing, the most effective hyperparameters were identified and are now used in the model's initialization. 
+
+\begin{itemize}
+    \item \textbf{Number of estimators (\texttt{n\_estimators})}: Set to 500.
+    \item \textbf{Maximum depth (\texttt{max\_depth})}: Set to 40.
+    \item \textbf{Minimum samples required to split an internal node (\texttt{min\_samples\_split})}: Set to 10.
+    \item \textbf{Minimum samples required at each leaf node (\texttt{min\_samples\_leaf})}: Set to 1.
+    \item \textbf{Class weight (\texttt{class\_weight})}: Set to \texttt{'balanced'}.
+\end{itemize}
+
+The following code snippet reflects the initialization of the RF model with the chosen hyperparameters:
+
+\vspace{0.2cm}
+\noindent
+\begin{minipage}{\linewidth}
+\begin{minted}{python}
+base_rf = RandomForestClassifier(n_estimators=500, random_state=42, 
+                                max_depth=40, min_samples_split=10, 
+                                min_samples_leaf=1, class_weight='balanced')
+multi_rf = MultiOutputClassifier(base_rf)
+\end{minted}
+\captionof{listing}{Random Forest Model Initialization.}
+\label{lst:rf_model_initialization}
+\end{minipage}
+\vspace{0.1cm}
+
+For the \gls{RL} model, a similar approach was used, but the model's hyperparameters, such as learning rate, batch size, and the number of epochs, were fine-tuned to ensure that the model could learn efficiently from feedback while maintaining stability in training. 
+The PPO algorithm was used, which is known for its stability and effectiveness in reinforcement learning tasks. 
+The key parameters for the \gls{RL} model include:
+
+\begin{itemize}
+    \item \textbf{Learning rate}: Set to 3e-4.
+    \item \textbf{Batch size}: Set to 64.
+    \item \textbf{Number of epochs}: Set to 4.
+    \item \textbf{Gamma}: Set to 0.99.
+    \item \textbf{GAE lambda}: Set to 0.9.
+    \item \textbf{Entropy coefficient}: Set to 0.01.
+\end{itemize}
+
+The \gls{RL} model's training process is designed to adjust its predictions based on the feedback it receives, improving accuracy over time by refining its policy.
+
+Both models underwent comprehensive testing to determine the optimal set of hyperparameters. Ultimately, the configurations used in the models' initialization were found to provide the best balance between performance, accuracy, and generalization.
+
+The finalized hyperparameters are now used in the model pipelines, ensuring efficient training and reliable predictions.
