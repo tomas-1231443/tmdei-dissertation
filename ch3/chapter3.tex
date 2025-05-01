@@ -37,9 +37,9 @@ It outlines the specific methodologies employed for each approach, detailing the
 
 \paragraph{Pipeline}
 
-Figure~\ref{fig:general_solution_pipeline} represents the general data processing pipeline for all solutions, illustrating the flow of data through various stages before it reaches the analyst. 
-
-The pipeline is designed to handle security alerts from multiple sources, process the data, and present the predictions to the analyst.
+The pipeline shown in Figure~\ref{fig:general_solution_pipeline} represents the general flow of data through various stages of the system. 
+This flow starts with the ingestion of raw security alert data, continues through preprocessing, and is ultimately processed by a machine learning model to generate predictions. 
+These predictions are then presented on the IBM SOAR dashboard, where analysts can review them and provide feedback, which is used to improve the model. 
 
 \begin{figure}[h!]
     \centering
@@ -51,15 +51,15 @@ The pipeline is designed to handle security alerts from multiple sources, proces
 This pipeline remains largely the same across all solutions, with the exception of section \texttt{C}, where the machine learning model varies depending on the solution. 
 While the overall structure of the pipeline is consistent, the type of model used in section \texttt{C} determines the specific prediction process and outputs.
 
-The described pipeline includes several key stages:
+To interpret the figure, a reader should understand the following stages in the pipeline:
 \begin{itemize}
-    \item \textbf{Raw security alert data ingestion:} In section \texttt{A}, alert data is collected from various log sources, such as SIEM systems, IDS, and firewalls. This data typically contains a wide range of information, including alert descriptions, timestamps, and metadata. In this section, the data is prepared for processing by standardizing the format across different sources.
-    \item \textbf{Data pre-processing:} In section \texttt{B}, the collected data undergoes a series of cleaning and normalization procedures. This stage includes feature extraction, where relevant information from the raw data is transformed into structured, usable features.
-    \item \textbf{Machine Learning Model (specific to each solution):} Section \texttt{C} involves feeding the pre-processed data into the machine learning model. The core of this section differs depending on the solution.
-    \item \textbf{Final predictions for the analyst dashboard:} After the predictions are generated in section \texttt{C}, the results are passed on to the IBM SOAR dashboard, section \texttt{D}. This dashboard presents the predictions to the analyst, who can review the outputs, including taxonomy, priority, false positive status, and confidence score. The analyst can provide feedback on these predictions, which is sent back into the system to refine future predictions, contributing to the model's long-term accuracy and adaptability.
+    \item \textbf{Section A:} Raw security alerts are collected from various sources, such as SIEM systems, IDS, and firewalls. The data is then standardized to ensure consistency.
+    \item \textbf{Section B:} The collected data undergoes preprocessing, which includes cleaning, normalization, and feature extraction.
+    \item \textbf{Section C:} This section involves the machine learning model. The specific model used here varies depending on the solution, and it generates predictions based on the preprocessed data.
+    \item \textbf{Section D:} Finally, the predictions are displayed on the IBM SOAR dashboard. Analysts can provide feedback on the predictions, and this feedback is used to improve the model over time.
 \end{itemize}
 
-This pipeline was designed to be modular and flexible, allowing for easy integration with existing systems and the ability to adapt to evolving security threats.
+The diagram helps visualize how the raw data moves through the system and how the predictions are continuously refined with feedback from the analysts.
 
 \subsubsection{Random Forest with Reinforcement Learning Feedback Loop}
 

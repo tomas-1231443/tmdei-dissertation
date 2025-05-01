@@ -1,4 +1,4 @@
-# Version 6 - Results Analysis
+# Version 1 - Results Analysis
 
 ## Metric Explanation
 
@@ -8,7 +8,7 @@
 - **Support:** The number of instances of each class in the test set.
 - **Overall Accuracy:** The total proportion of correct predictions over all instances.
 
-*Note: For Version 6, the dataset was split 70/30 (training/testing).*
+*Note: For Version 1, the dataset was split 70/30 (training/testing).*
 
 ---
 
@@ -91,5 +91,5 @@ Additionally, **TfidfVectorizer** was used to vectorize the `description` column
 
 ## Conclusion
 
-Version 6’s results show an **82% accuracy for both priority and taxonomy classification**. The **priority model remains stable**, with only minor performance changes. The **taxonomy classifier shows improvements in dominant categories but struggles with underrepresented ones**. Future enhancements should focus on **handling class imbalance** and **fine-tuning feature selection** to better separate difficult-to-classify categories.
+Version 1’s results show an **82% accuracy for both priority and taxonomy classification**. The **priority model remains stable**, with only minor performance changes. The **taxonomy classifier shows improvements in dominant categories but struggles with underrepresented ones**. Future enhancements should focus on **handling class imbalance** and **fine-tuning feature selection** to better separate difficult-to-classify categories.
 
