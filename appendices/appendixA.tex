@@ -1,7 +1,134 @@
-% Appendix A
+\chapter{Raw Outputs: Version 1 vs. Version 11}
+\label{AppendixA}
 
-\chapter{Appendix Title Here} % Main appendix title
+This appendix presents the raw outputs of the models for Version 1 and Version 11, which were used for the evaluation and analysis in Chapter 4, Section 4.1. These outputs include the confusion matrices and classification metrics for both priority and taxonomy classifications.
 
-\label{AppendixA} % For referencing this appendix elsewhere, use \ref{AppendixA}
+\section*{Version 1 Performance Metrics}
 
-Write your Appendix content here.
+\subsection*{Priority Classification}
+
+\begin{table}[h!]
+    \centering
+    \caption{Version 1 Priority Classification Metrics}
+    \label{tab:v1_priority_metrics}
+    \begin{tabular}{|l|c|c|c|c|}
+    \hline
+    \textbf{Class} & \textbf{Precision} & \textbf{Recall} & \textbf{F1-Score} & \textbf{Support} \\
+    \hline
+    P1 & 0.81 & 0.75 & 0.78 & 4162 \\
+    \hline
+    P2 & 0.81 & 0.77 & 0.79 & 9374\\
+    \hline
+    P3 & 0.83 & 0.89 & 0.86 & 12462 \\
+    \hline
+    \end{tabular}
+\end{table}
+
+\begin{itemize}
+    \item \textbf{Overall Accuracy:} 82\%
+    \item \textbf{Macro Average:} Precision 0.82, Recall 0.80, F1-Score 0.81
+    \item \textbf{Weighted Average:} Precision 0.82, Recall 0.82, F1-Score 0.82
+\end{itemize}
+
+\subsection*{Taxonomy Classification}
+
+\begin{table}[h!]
+    \centering
+    \caption{Version 1 Taxonomy Classification Metrics}
+    \label{tab:v1_taxonomy_metrics}
+    \begin{tabular}{|l|c|c|c|c|}
+    \hline
+    \textbf{Class} & \textbf{Precision} & \textbf{Recall} & \textbf{F1-Score} & \textbf{Support} \\
+    \hline
+    0 & 0.82 & 0.19 & 0.31 & 394 \\
+    \hline
+    1 & 0.94 & 0.86 & 0.90 & 1117 \\
+    \hline
+    2 & 0.95 & 0.95 & 0.95 & 5937 \\
+    \hline
+    3 & 0.78 & 0.47 & 0.59 & 1066 \\
+    \hline
+    4 & 0.72 & 0.84 & 0.78 & 6051 \\
+    \hline
+    5 & 0.78 & 0.73 & 0.75 & 3467 \\
+    \hline
+    6 & 0.66 & 0.54 & 0.59 & 1890 \\
+    \hline
+    7 & 0.86 & 0.92 & 0.89 & 5988 \\
+    \hline
+    8 & 0.74 & 0.36 & 0.49 & 88 \\
+    \hline
+    \end{tabular}
+\end{table}
+
+\begin{itemize}
+    \item \textbf{Overall Accuracy:} 82\%
+    \item \textbf{Macro Average:} Precision 0.81, Recall 0.65, F1-Score 0.69
+    \item \textbf{Weighted Average:} Precision 0.82, Recall 0.82, F1-Score 0.82
+\end{itemize}
+
+\newpage
+
+\section*{Version 11 Performance Metrics}
+
+\subsection*{Priority Classification}
+
+\begin{table}[h!]
+    \centering
+    \caption{Version 11 Priority Classification Metrics}
+    \label{tab:v11_priority_metrics}
+    \begin{tabular}{|l|c|c|c|c|}
+    \hline
+    \textbf{Class} & \textbf{Precision} & \textbf{Recall} & \textbf{F1-Score} & \textbf{Support} \\
+    \hline
+    P1 & 0.82 & 0.91 & 0.86 & 9511 \\
+    \hline
+    P2 & 0.89 & 0.85 & 0.87 & 18294 \\
+    \hline
+    P3 & 0.92 & 0.91 & 0.92 & 24287 \\
+    \hline
+    \end{tabular}
+\end{table}
+
+\begin{itemize}
+    \item \textbf{Overall Accuracy:} 90\%
+    \item \textbf{Macro Average:} Precision 0.89, Recall 0.89, F1-Score 0.88
+    \item \textbf{Weighted Average:} Precision 0.89, Recall 0.89, F1-Score 0.89
+\end{itemize}
+
+\subsection*{Taxonomy Classification}
+
+\begin{table}[h!]
+    \centering
+    \caption{Version 11 Taxonomy Classification Metrics}
+    \label{tab:v11_taxonomy_metrics}
+    \begin{tabular}{|l|c|c|c|c|}
+    \hline
+    \textbf{Class} & \textbf{Precision} & \textbf{Recall} & \textbf{F1-Score} & \textbf{Support} \\
+    \hline
+    0 & 0.95 & 0.95 & 0.95 & 5788 \\
+    \hline
+    1 & 0.96 & 0.97 & 0.97 & 5788 \\
+    \hline
+    2 & 0.96 & 0.94 & 0.95 & 5788 \\
+    \hline
+    3 & 0.90 & 0.94 & 0.92 & 5788 \\
+    \hline
+    4 & 0.78 & 0.73 & 0.76 & 5787 \\
+    \hline
+    5 & 0.86 & 0.84 & 0.85 & 5788 \\
+    \hline
+    6 & 0.87 & 0.89 & 0.88 & 5788 \\
+    \hline
+    7 & 0.89 & 0.89 & 0.89 & 5788 \\
+    \hline
+    8 & 0.95 & 0.99 & 0.97 & 5789 \\
+    \hline
+    \end{tabular}
+\end{table}
+
+\begin{itemize}
+    \item \textbf{Overall Accuracy:} 90\%
+    \item \textbf{Macro Average:} Precision 0.90, Recall 0.90, F1-Score 0.90
+    \item \textbf{Weighted Average:} Precision 0.90, Recall 0.90, F1-Score 0.90
+\end{itemize}

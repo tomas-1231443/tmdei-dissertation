@@ -14,3 +14,4 @@ SOC_Bot_Implementation/.idea/
 **/.DS_Store
 
 *.joblib
+SOC_Bot_Implementation/src/models/rl_agent.zip

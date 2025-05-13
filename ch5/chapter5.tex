@@ -2,3 +2,28 @@
 \label{chap:Chapter5}
 
 \section{Future Work}
+
+While the current solution shows what can be done in automating the security alert triage process, there remain several areas for future improvement and refinement. 
+
+One promising direction for future work involves the expansion of the training dataset. 
+While the current model uses a historical dataset to train the RF model, it could benefit from a broader range of data sources. 
+Integrating real-time data streams and continuously feeding the system with updated alerts will allow the models to adapt more quickly to evolving attack vectors. 
+The inclusion of external sources, such as threat intelligence feeds and behavioral data, may help improve the model's ability to detect and classify previously unseen threats.
+
+Furthermore, enhancing the interpretability of the models, particularly the RL component, would be beneficial. 
+While the current system provides high adaptability and can reduce false positives, the underlying decision-making process of the RL model remains relatively opaque. 
+Implementing techniques such as SHAP (SHapley Additive exPlanations) or LIME (Local Interpretable Model-Agnostic Explanations) could help increase transparency, allowing analysts to better understand why certain predictions are made and improving trust in the system.
+
+In terms of model optimization, future work could explore hyperparameter tuning for both the RF and RL models. 
+While the current version uses a well-optimized set of parameters, there remains room for improvement through more advanced techniques such as automated machine learning (AutoML) or Bayesian optimization. 
+These approaches could help identify the optimal configuration for both models, enhancing their overall performance in terms of accuracy, recall, and the ability to generalize across diverse security scenarios.
+
+Finally, the system's real-time performance in a live production environment could be further explored. 
+Currently, the RL model is expected to improve over time based on feedback. 
+However, integrating continuous model evaluation and performance tracking will allow for more dynamic model updates. 
+A feedback loop that accounts for the effectiveness of predictions in real-world conditions could lead to faster model adaptation, thereby improving the accuracy and efficiency of the system in managing alerts. 
+Regularly monitoring the system's real-world performance will help identify any gaps and enable proactive updates.
+
+So while the solution has proven effective in its current form, future advancements in data collection, model training, interpretability, and real-time performance tracking will be critical to ensuring that the bot remains adaptable to emerging threats and continues to provide accurate predictions in complex, dynamic environments.
+
+\section{Conclusion}

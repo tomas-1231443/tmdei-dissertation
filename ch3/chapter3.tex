@@ -279,55 +279,25 @@ The goal is to assess their suitability in the context of a real-world SOC envir
 
 \normalsize
 
-% \textbf{Solution 1} combines RF with RL, offering a highly adaptable system that continuously improves its performance over time. 
-% The integration of RF for initial predictions and RL for feedback-based adjustments allows the system to react to evolving cybersecurity threats.
+Solution 1 offers the best combination of \textbf{moderate implementation complexity} and \textbf{high adaptability}. 
+Its use of a pre-trained RF model combined with a \textbf{Reinforcement Learning (RL)} feedback loop allows the system to continuously learn and adapt in real-time. 
+This continuous learning process ensures the solution remains effective in dynamic and rapidly evolving environments, handling new threats efficiently. 
+The \textbf{moderate complexity} comes from integrating the two models, but this is outweighed by its high scalability and ability to adjust based on new data.
 
-% \begin{itemize}
-%     \item The implementation complexity is moderate, as integrating two models (RF and RL) requires careful setup but remains manageable with existing frameworks like scikit-learn and RLlib.
-%     \item High adaptability, as the RL model continuously adjusts based on analyst feedback. The system can handle new attack patterns without requiring manual updates, making it effective in dynamic environments.
-%     \item This solution uses online learning through the RL feedback loop, which means feedback from analysts is immediately integrated into the model, refining its predictions in real-time.
-%     \item Excellent cold start handling, thanks to the pre-trained RF model. This allows the system to make predictions right away, with the RL model improving its performance gradually over time.
-%     \item Moderate interpretability due to the transparency of the RF model, but the integration of RL adds complexity, making it harder to explain the decision-making process.
-%     \item High performance in evolving scenarios, as the RL model adapts in real-time to new data, making it well-suited for fast-changing threat landscapes.
-% \end{itemize}
+Solution 2, while \textbf{highly scalable}, has \textbf{high implementation complexity} due to the need for substantial computational resources to train the DNN. 
+Although it offers excellent feature extraction capabilities, its \textbf{moderate adaptability} limits its response to new threats. 
+The DNN requires retraining with new data, making it slower and less responsive compared to Solution 1's real-time learning.
 
-% \textbf{Solution 2} uses a DNN that processes raw alert data through attention mechanisms to automatically extract features and classify alerts. 
-% Unlike \textbf{Solution 1}, it doesn't use RL for real-time feedback but relies on periodic retraining to improve performance.
+In contrast, Solution 3 is \textbf{easy to implement} and offers \textbf{high interpretability} due to its rule-based system and decision trees. 
+However, its \textbf{low adaptability} makes it unsuitable for handling evolving threats, as it depends on manual updates and cannot learn in real time. 
+While the simplicity of this approach is beneficial in static environments, it fails to scale effectively in more complex, dynamic security landscapes.
 
-% \begin{itemize}
-%     \item High implementation complexity because training a DNN requires substantial computational resources and time, especially when handling raw data with attention mechanisms. This makes it more complex to implement compared to \textbf{Solution 1}.
-%     \item Moderate adaptability. The DNN model learns from feedback, but it does so through periodic retraining. It doesn't adjust in real-time like \textbf{Solution 1}, making it less responsive to new threats immediately after they emerge.
-%     \item Feedback is applied during periodic retraining. This means the model improves over time but is slower to adapt compared to \textbf{Solution 1}, which has real-time learning through RL.
-%     \item Poor cold start handling. The DNN model requires a significant amount of labeled data to be trained before it can start making reliable predictions. It cannot provide immediate predictions like \textbf{Solution 1}.
-%     \item Low interpretability. DNN models are often considered “black boxes,” making it difficult to explain how certain predictions were made, especially when attention mechanisms are involved.
-%     \item Moderate performance. While the DNN is effective on known data, it needs retraining to adjust to new, unseen patterns, making it less suited for dynamic cybersecurity environments compared to \textbf{Solution 1}.
-% \end{itemize}
+In terms of performance, Solution 1 excels in \textbf{performance in evolving scenarios}, making it the most suitable for fast-changing environments. 
+Solution 2 performs \textbf{moderately} in this regard, with slower adjustments compared to Solution 1. 
+Solution 3, being static, performs \textbf{poorly} in evolving scenarios and requires manual intervention to remain effective.
 
-% \textbf{Solution 3} integrates static expert rules with a lightweight DTC. 
-% The rule engine filters known patterns, while the DTC handles ambiguous or unknown cases. 
-% Feedback is aggregated and applied periodically to retrain the decision tree and refine the rules.
-
-% \begin{itemize}
-%     \item Low implementation complexity. The system is built with simple decision tree algorithms and rule-based filtering, making it easier to implement compared to the more complex \textbf{Solution 1} and \textbf{Solution 2}.
-%     \item Low adaptability. The system relies on manual updates to the rules base to address new attack vectors. It is not capable of real-time adjustments like \textbf{Solution 1}.
-%     \item Feedback is applied asynchronously. The system doesn't adjust in real-time but instead uses periodic feedback to update the rules and retrain the decision tree. This makes it slower to improve and adapt to changing threats.
-%     \item Excellent cold start handling. The rules-based system can immediately classify alerts based on predefined patterns, and the DTC can be deployed quickly without extensive data preparation.
-%     \item High interpretability. Both the rule engine and DTC are transparent, allowing security analysts to easily understand the rationale behind decisions. This is a major advantage in environments that require auditing and explainability.
-%     \item Low performance in evolving scenarios. The system relies on static rules, which require manual updates to accommodate new threats. It is less flexible than \textbf{Solution 1} or \textbf{Solution 2}, making it less effective in rapidly changing cybersecurity environments.
-% \end{itemize}
-
-% \subsubsection{Overall Evaluation}
-
-Solution 1 is optimal because it offers adaptability, scalability, and real-time learning. 
-Integrating RF with RL continuously adapts to new threats through real-time feedback, making it highly effective in dynamic cybersecurity environments.
-
-Solution 2 excels in feature extraction using DNN but lacks immediate adaptability. 
-It requires periodic retraining, making it less responsive to evolving threats than Solution 1.
-
-Solution 3, while simple and interpretable, is not adaptable. 
-It relies on static rules and manual updates, making it less suitable for fast-changing threat landscapes.
-
-In conclusion, Solution 1 is the best option for real-time alert classification and long-term adaptability in a SOC environment.
+Considering the trade-offs, \textbf{Solution 1} stands out as the optimal choice, balancing scalability, adaptability, and complexity. 
+Its ability to evolve with emerging threats makes it the most reliable solution for real-time alert classification in dynamic cybersecurity environments.
 
 \section{Proof of Concept}
 This section presents the practical implementation of the proposed solution, including the setup of the test environment, preparation of the dataset, and execution of the ML models. It aims to demonstrate the feasibility and performance of the selected approach under realistic conditions.

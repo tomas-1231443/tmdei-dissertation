@@ -26,6 +26,8 @@ Table~\ref{tab:results_comparative} shows the values for the metrics of Version 
 
 \begin{table}[h!]
     \centering
+    \caption{Model Performance Metrics Comparison: Version 1 vs. Version 11}
+    \label{tab:results_comparative}
     \begin{tabular}{@{}ccccc@{}}
         \toprule
         \multirow{2}{0em}{} & \multicolumn{2}{c}{\textbf{Priority}} & \multicolumn{2}{c}{\textbf{Taxonomy}} \\
@@ -37,8 +39,6 @@ Table~\ref{tab:results_comparative} shows the values for the metrics of Version 
         \textbf{F1-Score} & 82\% & 89\% & 69\% & 90\% \\
         \bottomrule
     \end{tabular}
-    \caption{Model Performance Metrics Comparison: Version 1 vs. Version 11}
-    \label{tab:results_comparative}
 \end{table}
 
 From the table, it is evident that Version 11 demonstrates notable improvements over Version 1 in all metrics. Specifically:
@@ -56,14 +56,18 @@ The enhanced recall for minority classes is particularly noteworthy, as it demon
 Besides accuracy, recall is a fundamental factor, as being able to correctly identify an alert for what it truly is—whether in terms of priority or taxonomy—is critical. 
 Confusing a P1 (high priority) with a P3 (low priority) can have serious consequences, potentially leading to delayed responses or misallocated resources.
 
-Therefor, analyzing the confusion matrixes is essential to understand the model's performance in detail.
-The confusion matrixes provide a visual representation of the model's performance, allowing us to see how well the model classifies each category and where it tends to make mistakes.
+The confusion matrix is a fundamental tool in evaluating the performance of classification models, providing a detailed breakdown of the model's predictions across all categories. 
+It is a tabular representation that contrasts the actual labels with the predicted labels, allowing for the identification of true positives, false positives, true negatives, and false negatives for each class. 
+
+This granular insight is crucial for understanding the model's strengths and weaknesses, particularly in distinguishing between similar or imbalanced classes. 
+The confusion matrices presented in this section are derived from the same output\footnote{All outputs relevant to this section can be found in Appendix~\ref{AppendixA}.} as the previously discussed performance metrics, generated during the execution of the command that initiates the training of the RF model.
+
+Therefor, analyzing the confusion matrices is essential to understand the model's performance in detail.
+The confusion matrices provide a visual representation of the model's performance, allowing us to see how well the model classifies each category and where it tends to make mistakes.
 
 Figures~\ref{fig:confusion_priority_v1} and \ref{fig:confusion_priority_v11} illustrate the evolution of the model's performance in priority classification from Version 1 to Version 11. 
 
-\clearpage
-
-\begin{figure}[t!]
+\begin{figure}[h!]
     \centering
     \begin{minipage}{0.49\textwidth}
         \centering
@@ -89,7 +93,7 @@ These enhancements reflect a substantial reduction in misclassifications, partic
 The key advancements from Version 1 to Version 11 are evident in the increased recall for P2, which rose from 0.77 to 0.85, and for P3, which improved from 0.89 to 0.91. 
 These results underscore the model's enhanced accuracy and robustness in handling priority-based predictions, particularly for categories that were previously challenging to classify accurately.
 
-The same analysis can be applied to taxonomy classification, where the confusion matrixes provide insights into the model's performance across different categories.
+The same analysis can be applied to taxonomy classification, where the confusion matrices provide insights into the model's performance across different categories.
 
 In Version 1 (Figure~\ref{fig:confusion_taxonomy_v1}), the model's performance was somewhat lacking, especially with low-frequency categories. 
 For example:
@@ -98,9 +102,16 @@ For example:
     \item \textbf{"Abusive Content"} had a recall of only \textbf{0.19}, meaning that a substantial portion of this class was misclassified.
     \item \textbf{"Fraud"} performed well with \textbf{0.95} recall, demonstrating that the model successfully identifies most instances of fraud.
     \item \textbf{"Vulnerable"} had \textbf{0.36} recall, indicating the model struggled to identify alerts related to vulnerabilities.
-    \item \textbf{"Intrusions"} also performed poorly with \textbf{0.26} recall.
-    \item \textbf{"Information Security"} was significantly more challenging with \textbf{0.03} recall, suggesting that the model could not detect a substantial portion of critical security threats in this category.
+    \item \textbf{"Intrusions"} also performed poorly with \textbf{0.54} recall.
+    \item \textbf{"Information Gathering"} was significantly more challenging with \textbf{0.47} recall, suggesting that the model could not detect a substantial portion of critical security threats in this category.
 \end{itemize}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{ch4/assets/v1_confusion_taxonomy.png}
+    \caption{Confusion Matrix for Taxonomy (Version 1)}
+    \label{fig:confusion_taxonomy_v1}
+\end{figure}
 
 Whereas, in Version 11 (Figure~\ref{fig:confusion_taxonomy_v11}), the model's performance improved significantly across all categories.
 
@@ -109,26 +120,16 @@ In Version 11, several key improvements were made:
 \begin{itemize}
     \item \textbf{"Abusive Content"} showed a dramatic improvement in recall to \textbf{0.46}, almost a threefold increase. The model is now better at identifying such content, which is crucial in detecting harmful communications or activity.
     \item \textbf{"Fraud"} maintained a high recall of \textbf{0.94}, demonstrating that the model continues to perform well in this critical category.
-    \item \textbf{"Vulnerable"} showed a notable improvement in recall to \textbf{0.79}, addressing the initial weakness seen in Version 1. This is essential for detecting vulnerabilities and minimizing risks.
-    \item \textbf{"Intrusions"} also improved significantly to \textbf{0.64}, indicating that the model is now better at identifying intrusion attempts, which are often targeted threats.
-    \item \textbf{"Information Security"} improved from \textbf{0.03} in Version 1 to \textbf{0.32} in Version 11, reflecting a better capability to identify security-related alerts, which was a major challenge in the previous version.
+    \item \textbf{"Vulnerable"} showed a notable improvement in recall to \textbf{0.99}, addressing the initial weakness seen in Version 1. This is essential for detecting vulnerabilities and minimizing risks.
+    \item \textbf{"Intrusions"} also improved significantly to \textbf{0.89}, indicating that the model is now better at identifying intrusion attempts, which are often targeted threats.
+    \item \textbf{"Information Gathering"} improved from \textbf{0.47} in Version 1 to \textbf{0.94} in Version 11, reflecting a better capability to identify security-related alerts, which was a major challenge in the previous version.
 \end{itemize}
 
 \begin{figure}[h!]
     \centering
-    \begin{minipage}{0.49\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{ch4/assets/v1_confusion_taxonomy.png}
-        \caption{Confusion Matrix for Taxonomy (Version 1)}
-        \label{fig:confusion_taxonomy_v1}
-    \end{minipage}
-    \hfill
-    \begin{minipage}{0.49\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{ch4/assets/v11_confusion_taxonomy.png}
-        \caption{Confusion Matrix for Taxonomy (Version 11)}
-        \label{fig:confusion_taxonomy_v11}
-    \end{minipage}
+    \includegraphics[width=\textwidth]{ch4/assets/v11_confusion_taxonomy.png}
+    \caption{Confusion Matrix for Taxonomy (Version 11)}
+    \label{fig:confusion_taxonomy_v11}
 \end{figure}
 
 The improvements in recall across all categories in Version 11 indicate that the model is now more effective at identifying relevant alerts, particularly in low-frequency categories.
