@@ -7,6 +7,7 @@ import uvicorn
 import pandas as pd
 import numpy as np
 from typing import Optional
+import re
 from sklearn.ensemble import RandomForestClassifier
 from fastapi import FastAPI, BackgroundTasks, HTTPException
 from pydantic import BaseModel
@@ -53,7 +54,7 @@ async def lifespan(app: FastAPI):
     # Startup code can be added here if needed.
     yield
     # Shutdown: Save the RL agent if it exists.
-    global rl_agent
+    global rl_agent, last_rl_mtime
     try:
         mtime = os.path.getmtime(src.config.RL_AGENT_PATH)
     except FileNotFoundError:
@@ -147,6 +148,12 @@ async def process_alert_final(alert: Alert):
     try:
         logger.debug(f"Received MinimalAlert for final prediction: {alert.model_dump_json()}")
 
+        critical_flag = 1 if re.search(
+            r'Related with Critical Asset:\s*\{color:red\}True',
+            alert.description, flags=re.IGNORECASE
+        ) else 0
+        logger.debug(f"CriticalAsset flag: {critical_flag}")
+
         global rl_agent, last_rl_mtime
 
         try:
@@ -165,8 +172,13 @@ async def process_alert_final(alert: Alert):
             normalized_text = f"{normalized_text} {alert.rule_name}"
         
         # Get baseline RF prediction.
-        rf_pred = model["pipeline"].predict([normalized_text])[0]
-        rf_probas = model["pipeline"].predict_proba([normalized_text])
+        X_df = pd.DataFrame([{
+            "Description": normalized_text,
+            "CriticalAsset": critical_flag
+        }])
+
+        rf_pred   = model["pipeline"].predict(X_df)[0]
+        rf_probas = model["pipeline"].predict_proba(X_df)
         rf_pri_conf = float(rf_probas[0][0][rf_pred[0]])
         rf_tax_conf = float(rf_probas[1][0][rf_pred[1]])
         rf_confidence = (rf_pri_conf + rf_tax_conf) / 2.0
@@ -176,10 +188,9 @@ async def process_alert_final(alert: Alert):
         scaled_priority = rf_pred[0] / (num_priority - 1) if num_priority > 1 else 0.0
         scaled_taxonomy = rf_pred[1] / (num_taxonomy - 1) if num_taxonomy > 1 else 0.0
         
-        ### CHANGED: Use the global SBERT vectorizer instead of reinitializing.
         embedding = global_sbert_vectorizer.transform([normalized_text])[0]
         
-        obs = np.concatenate(([scaled_priority, scaled_taxonomy], embedding)).astype(np.float32)
+        obs = np.concatenate(([scaled_priority, scaled_taxonomy, critical_flag], embedding)).astype(np.float32)
         
         if rl_agent is None:
             logger.info("RL agent not initialized; falling back to RF prediction.")
@@ -289,7 +300,7 @@ def main(verbose, excel_path, retrain, model_version, port, preprocess_only, tun
         
     logger.info("Model is ready for use. Loading RL agent...")
 
-    dummy_env = RLDummyEnv(observation_dim=386)
+    dummy_env = RLDummyEnv(observation_dim=387)
     if os.path.exists(src.config.RL_AGENT_PATH):
         try:
             rl_agent = PPO.load(src.config.RL_AGENT_PATH, env=dummy_env)

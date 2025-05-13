@@ -137,6 +137,14 @@ def preprocess_bulk_alerts(df: pd.DataFrame, *, logger) -> pd.DataFrame:
     df = pd.concat(oversampled_dfs, ignore_index=True)
 
     logger.debug(f"Oversampled taxonomy counts: {df['Taxonomy'].value_counts()}")
+
+        # Extract the Critical Asset flag into its own column:
+    def extract_critical(text: str) -> int:
+        m = re.search(r'Related with Critical Asset:\s*\{color:red\}(True|False)', text, flags=re.IGNORECASE)
+        return 1 if m and m.group(1).lower() == 'true' else 0
+
+    tqdm.pandas(desc="Extracting CriticalAsset flag")
+    df["CriticalAsset"] = df["Description"].progress_apply(extract_critical)
     
     tqdm.pandas(desc="Cleaning descriptions")
     df["Description"] = df["Description"].progress_apply(clean_text)

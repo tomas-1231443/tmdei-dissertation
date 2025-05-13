@@ -1,0 +1,28 @@
+Test Accuracy - Priority: 0.89, Taxonomy: 0.90
+Classification Report for Priority:
+              precision    recall  f1-score   support
+
+           0       0.83      0.94      0.88     10985
+           1       0.88      0.85      0.86     21344
+           2       0.93      0.91      0.92     28243
+
+    accuracy                           0.89     60572
+   macro avg       0.88      0.90      0.89     60572
+weighted avg       0.89      0.89      0.89     60572
+
+Classification Report for Taxonomy:
+              precision    recall  f1-score   support
+
+           0       0.95      0.89      0.92      6730
+           1       0.94      0.97      0.95      6730
+           2       0.90      0.94      0.92      6730
+           3       0.89      0.94      0.92      6730
+           4       0.79      0.74      0.76      6731
+           5       0.87      0.82      0.85      6730
+           6       0.86      0.90      0.88      6730
+           7       0.90      0.89      0.89      6730
+           8       0.95      0.96      0.96      6731
+
+    accuracy                           0.90     60572
+   macro avg       0.89      0.90      0.89     60572
+weighted avg       0.89      0.90      0.89     60572

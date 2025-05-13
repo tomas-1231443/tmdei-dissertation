@@ -1,0 +1,61 @@
+services:
+  redis:
+    image: redis:7
+    container_name: redis
+    networks:
+      - soc_net
+
+  bot:
+    image: soc-bot-image
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: soc-bot
+    ports:
+      - "8000:8000"
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    volumes:
+      - shared-rl-agent:/app/src/models/
+    depends_on:
+      - redis
+    networks:
+      - soc_net
+
+  celery:
+    image: soc-bot-image
+    container_name: soc-celery
+    command: celery -A src.celery_app worker --loglevel=info --pool=solo
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - CELERYD_LOG_FILE=logs/celery.log
+      - CELERYD_LOG_LEVEL=INFO
+    volumes:
+      - shared-rl-agent:/app/src/models/
+    depends_on:
+      - redis
+    networks:
+      - soc_net
+
+  flower:
+    image: soc-bot-image
+    container_name: flower
+    command: celery -A src.celery_app flower --port=5555 --basic-auth=Tomas:2002
+    ports:
+      - "5555:5555"
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      - redis
+    networks:
+      - soc_net
+
+volumes:
+  shared-rl-agent:
+
+networks:
+  soc_net:
+    driver: bridge

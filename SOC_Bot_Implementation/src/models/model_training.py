@@ -17,6 +17,8 @@ from sklearn.multioutput import MultiOutputClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import LabelEncoder
 from sklearn.pipeline import Pipeline
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import FeatureUnion
 from sentence_transformers import SentenceTransformer
 from sklearn.base import BaseEstimator, TransformerMixin
 from src.logger import with_logger
@@ -102,19 +104,26 @@ def train_rf_model(df: pd.DataFrame, tune: bool = False, *, logger) -> Dict[str,
           - "le_taxonomy": The LabelEncoder used for the Taxonomy labels.
     """
     logger.info("Starting training of the Random Forest model for multi-output classification.")
-       
-    # 1. Vectorize the Description column using Bert.
-    vectorizer = SentenceBertVectorizer(model_name="paraphrase-MiniLM-L6-v2")
-    X = vectorizer.fit_transform(df["Description"])
 
-    # 2. Encode targets.
+    # 1. Build the joint feature transformer
+    text_vect = ("text", SentenceBertVectorizer(model_name="paraphrase-MiniLM-L6-v2"), "Description")
+    asset_pass = ("asset", "passthrough", ["CriticalAsset"])
+
+    preproc = ColumnTransformer(
+        transformers=[text_vect, asset_pass],
+        remainder="drop",       # drop any other columns
+        sparse_threshold=0      # always return dense arrays
+    )
+
     le_priority = LabelEncoder()
     le_taxonomy = LabelEncoder()
+
+    X_df = df[["Description", "CriticalAsset"]]
     y_priority = le_priority.fit_transform(df["Priority"])
     y_taxonomy = le_taxonomy.fit_transform(df["Taxonomy"])
-    
-    # Combine the two targets into a single 2D array.
     Y = np.column_stack((y_priority, y_taxonomy))
+
+    X = preproc.fit_transform(X_df)
     logger.debug("Target labels encoded.")
 
     if tune:
@@ -196,7 +205,7 @@ def train_rf_model(df: pd.DataFrame, tune: bool = False, *, logger) -> Dict[str,
     
     # 6. Create a pipeline that includes the vectorizer and the classifier.
     pipeline = Pipeline([
-        ("vectorizer", vectorizer),
+        ("vectorizer", preproc),
         ("classifier", multi_rf)
     ])
     
@@ -354,7 +363,7 @@ def _tune_hyperparameters(X: np.array, Y: np.array, *, logger) -> dict:
     return {"pipeline": best_model, "best_params": best_params, "best_score": best_score}
 
 @with_logger    
-def predict_alert(trained_model: dict, description: str, *, logger) -> dict:
+def predict_alert(trained_model: dict, description: str, critical_flag: int, *, logger) -> dict:
     """
     Uses the trained model pipeline and label encoders to predict Priority and Taxonomy from a raw description.
     
@@ -372,12 +381,11 @@ def predict_alert(trained_model: dict, description: str, *, logger) -> dict:
     le_priority = trained_model["le_priority"]
     le_taxonomy = trained_model["le_taxonomy"]
     
-    # The pipeline expects an iterable of texts.
-    prediction = pipeline.predict([description])  # prediction shape: (1, 2)
-    priority_numeric, taxonomy_numeric = prediction[0]
+    X_pred = pd.DataFrame([{"Description": description, "CriticalAsset": critical_flag}])
     
-    # Decode numeric labels to original string labels.
-    priority_label = le_priority.inverse_transform([priority_numeric])[0]
-    taxonomy_label = le_taxonomy.inverse_transform([taxonomy_numeric])[0]
+    pred_numeric = pipeline.predict(X_pred)[0]
     
-    return {"Priority": priority_label, "Taxonomy": taxonomy_label}
+    pri_label = le_priority.inverse_transform([pred_numeric[0]])[0]
+    tax_label = le_taxonomy.inverse_transform([pred_numeric[1]])[0]
+
+    return {"Priority": pri_label, "Taxonomy": tax_label}
