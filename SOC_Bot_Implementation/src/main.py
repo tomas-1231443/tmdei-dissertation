@@ -9,9 +9,13 @@ import numpy as np
 from typing import Optional
 import re
 from sklearn.ensemble import RandomForestClassifier
-from fastapi import FastAPI, BackgroundTasks, HTTPException
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from stable_baselines3 import PPO
+
+from fastapi.responses import StreamingResponse
+import io
+from urllib.parse import urlparse
 
 import time
 import asyncio
@@ -29,6 +33,13 @@ logger = None
 rl_agent = None
 last_rl_mtime = os.path.getmtime(src.config.RL_AGENT_PATH) if os.path.exists(src.config.RL_AGENT_PATH) else time.time()
 
+redis_url = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
+parsed_url = urlparse(redis_url)
+r_host = parsed_url.hostname or "localhost"
+r_port = parsed_url.port or 6379
+r_db = int(parsed_url.path.replace("/", "") or 0)
+r = redis.Redis(host=r_host, port=r_port, db=r_db)
+
 training_lock = asyncio.Lock()
     
 ### CHANGED: Create a global SBERT vectorizer to avoid reinitializing it multiple times.
@@ -44,6 +55,8 @@ class Alert(BaseModel):
 class AlertFeedback(BaseModel):
     description: str
     rule_name: str
+    guessed_priority: str
+    guessed_taxonomy: str
     correct_priority: str
     correct_taxonomy: str
     resolution: str
@@ -68,8 +81,8 @@ async def lifespan(app: FastAPI):
         last_rl_mtime = mtime
         logger.info(f"Detected updated RL agent on disk; reloaded from {src.config.RL_AGENT_PATH}")
 
-    rl_agent.save(src.config.RL_AGENT_PATH)
-    logger.info(f"RL agent saved to {src.config.RL_AGENT_PATH}")
+        rl_agent.save(src.config.RL_AGENT_PATH)
+        logger.info(f"RL agent saved to {src.config.RL_AGENT_PATH}")
 
 # Create FastAPI app
 app = FastAPI(title="SOC Bot API", description="API for handling QRadar alerts and returning model predictions.", lifespan=lifespan)
@@ -79,11 +92,10 @@ async def health():
     logger.debug("Health check requested.")
     return {"status": "OK"}
 
-redis_client = redis.Redis(host='localhost', port=6379, db=0)
-
 @app.get("/queue_length")
 def queue_length():
-    length = redis_client.llen("celery")  # Adjust key based on your configuration
+    global r
+    length = r.llen("celery")  # Adjust key based on your configuration
     return {"queue_length": length}
 
 @app.post("/alerts")
@@ -103,7 +115,7 @@ async def process_alert(alert: Alert):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/alerts/feedback")
-async def process_feedback(feedback: AlertFeedback, background_tasks: BackgroundTasks):
+async def process_feedback(feedback: AlertFeedback):
     """
     Receive feedback and, only when appropriate, enqueue RL training.
     """
@@ -260,6 +272,43 @@ def train(path: str, tune=False) -> Optional[RandomForestClassifier]:
         logger.error(f"Error loading or preprocessing Excel data: {e}")
         return
     return train_rf_model(df_clean, tune)
+
+@app.get("/stats/export")
+def export_stats_csv():
+    """
+    Export Redis stats counters as CSV.
+    Returns a file with columns: date, type, label, correct, incorrect, total
+    """
+    import csv
+
+    global r
+    keys = r.keys("stats:*:*:*:correct") + r.keys("stats:*:*:*:incorrect")
+    stats = {}
+
+    for key in keys:
+        key_str = key.decode()
+        parts = key_str.split(":")
+        if len(parts) != 5:
+            continue
+
+        _, date, category, label, result_type = parts
+        stats.setdefault((date, category, label), {"correct": 0, "incorrect": 0})
+        stats[(date, category, label)][result_type] = int(r.get(key))
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["date", "type", "label", "correct", "incorrect", "total"])
+
+    for (date, category, label), values in sorted(stats.items()):
+        correct = values.get("correct", 0)
+        incorrect = values.get("incorrect", 0)
+        total = correct + incorrect
+        writer.writerow([date, category, label, correct, incorrect, total])
+
+    output.seek(0)
+    return StreamingResponse(output, media_type="text/csv", headers={
+        "Content-Disposition": "attachment; filename=stats.csv"
+    })
 
 @click.command()
 @click.option("-v", "--verbose", is_flag=True, default=False, help="Enable verbose (DEBUG) logging.")
