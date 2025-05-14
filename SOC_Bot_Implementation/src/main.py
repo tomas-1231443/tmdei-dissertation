@@ -13,6 +13,7 @@ from fastapi import FastAPI, BackgroundTasks, HTTPException
 from pydantic import BaseModel
 from stable_baselines3 import PPO
 
+import time
 import asyncio
 import src.config
 from src.logger import get_logger
@@ -26,7 +27,8 @@ model = None
 model_v = None
 logger = None
 rl_agent = None
-last_rl_mtime = os.path.getmtime(src.config.RL_AGENT_PATH)
+last_rl_mtime = os.path.getmtime(src.config.RL_AGENT_PATH) if os.path.exists(src.config.RL_AGENT_PATH) else time.time()
+
 training_lock = asyncio.Lock()
     
 ### CHANGED: Create a global SBERT vectorizer to avoid reinitializing it multiple times.
@@ -61,7 +63,7 @@ async def lifespan(app: FastAPI):
         mtime = None
 
     if mtime and mtime > last_rl_mtime:
-        dummy_env = RLDummyEnv(observation_dim=386)
+        dummy_env = RLDummyEnv(observation_dim=387)
         rl_agent = PPO.load(src.config.RL_AGENT_PATH, env=dummy_env)
         last_rl_mtime = mtime
         logger.info(f"Detected updated RL agent on disk; reloaded from {src.config.RL_AGENT_PATH}")
@@ -162,7 +164,7 @@ async def process_alert_final(alert: Alert):
             mtime = None
 
         if mtime and mtime > last_rl_mtime:
-            dummy_env = RLDummyEnv(observation_dim=386)
+            dummy_env = RLDummyEnv(observation_dim=387)
             rl_agent = PPO.load(src.config.RL_AGENT_PATH, env=dummy_env)
             last_rl_mtime = mtime
             logger.info(f"Detected updated RL agent on disk; reloaded from {src.config.RL_AGENT_PATH}")
@@ -319,6 +321,7 @@ def main(verbose, excel_path, retrain, model_version, port, preprocess_only, tun
                 ent_coef=0.01,
                 verbose=1,
             )
+            rl_agent.save(src.config.RL_AGENT_PATH)
             logger.info("Initialized new RL agent due to load error.")
     else:
         rl_agent = PPO(
@@ -333,6 +336,7 @@ def main(verbose, excel_path, retrain, model_version, port, preprocess_only, tun
             ent_coef=0.01,
             verbose=1,
         )
+        rl_agent.save(src.config.RL_AGENT_PATH)
         logger.info("Initialized new RL agent as no saved agent was found.")
 
     logger.info("RF model and RL agent are ready. Starting API server...")

@@ -1,88 +1,175 @@
-# SOC Bot API Documentation
+# **SOC Bot API Specification**
 
-This document describes the endpoints of the SOC Bot API, which is designed to process security alerts from QRadar SOAR and return predictions for Priority and Taxonomy. The API is built using FastAPI and is designed to integrate into your existing security operations environment.
-
-## Endpoints
-
-### 1. Health Check
-
-- **Endpoint:** `GET /health`
-- **Purpose:**  
-  Verify that the API server is running and responsive.
-- **Response:**  
-  A JSON object indicating the server status.
-  ```json
-  {
-      "status": "OK"
-  }
-  ```
-- **Usage:**  
-  Use this endpoint to perform a simple connectivity check before sending alerts.
+**Version:** 1.0
+**Base URL:** `http://<HOST>:8000`
 
 ---
 
-### 2. Process Alert
+## Overview
 
-- **Endpoint:** `POST /alerts`
-- **Purpose:**  
-  Receive and process an alert from QRadar SOAR, and return predictions for the alert's Priority and Taxonomy.
-- **Request Format:**  
-  The endpoint expects a JSON payload conforming to the following Pydantic model:
-  ```json
-  {
-      "Issue_ID": "string",
-      "Issue_Type": "string",
-      "Status": "string",
-      "Description": "string",
-      "Custom_field_Alert_Technology": "string",
-      "Custom_field_Incident_Description": "string",
-      "Custom_field_Incident_Resolution_1": "string",
-      "Custom_field_Request_Type": "string",
-      "Custom_field_Source": "string",
-      "Custom_field_Source_Alert_Rule_Name": "string",
-      "Custom_field_Source_Alert_Id": "string",
-      "Custom_field_Taxonomy": "string",
-      "Priority": "string"
-  }
-  ```
-  - **Note:**  
-    - The **Description** field is preprocessed (cleaned and normalized) before vectorization.
-    - The RF model, trained on historical data, uses the preprocessed **Description** to predict the appropriate **Priority** and **Taxonomy**.
+The SOC Bot API exposes endpoints for classifying incoming security alerts and ingesting analyst feedback for adaptive retraining. It leverages a hybrid Random Forest and Reinforcement Learning model pipeline.
 
-- **Response Format:**  
-  On success, the API returns a JSON object with the Issue ID and the predicted values:
-  ```json
-  {
-      "Issue ID": "string",
-      "Prediction": "Predicted Priority and Taxonomy (formatted as a string)"
-  }
-  ```
-- **Workflow Overview:**  
-  1. The raw alert JSON is received and converted into a dictionary.
-  2. The alert is processed via a custom ingestion function.
-  3. The processed alert is converted to a DataFrame and then vectorized.
-  4. The pre-trained model predicts the Priority and Taxonomy.
-  5. The results are logged and returned as a JSON response.
+This document specifies the endpoints required for integration into automated SOAR playbooks, as well as auxiliary endpoints that support monitoring and system health checks.
 
 ---
 
-### 3. Feedback Endpoint (Planned for Future Implementation)
+## Endpoints Summary
 
-- **Endpoint:** `POST /feedback` *(Not Implemented)*
-- **Purpose:**  
-  In future versions, this endpoint will allow analysts to submit corrections to the model's predictions. The goal is to use this feedback to further train and fine-tune the ML model via reinforcement learning.
-- **Expected Request Format:**  
-  The JSON payload might include:
-  ```json
-  {
-      "Issue_ID": "string",
-      "Correct_Priority": "string",
-      "Correct_Taxonomy": "string",
-      "Description": "string"
-  }
-  ```
-- **Intended Behavior:**  
-  - The system will record the provided corrections.
-  - Based on the feedback, the reinforcement learning module (yet to be implemented) will adjust or retrain the model to improve accuracy over time.
-- **Note:**  
-  This endpoint is currently **not implemented**. It is planned for future releases to enable a dynamic, learning feedback loop from analyst corrections.
+| Endpoint           | Method | Purpose                                    |
+| ------------------ | ------ | ------------------------------------------ |
+| `/alerts/final`    | POST   | Returns final classification for an alert. |
+| `/alerts/feedback` | POST   | Submits feedback for RL model retraining.  |
+| `/health`          | GET    | Returns API availability status.           |
+| `/queue_length`    | GET    | Returns number of pending Celery tasks.    |
+
+---
+
+## `/alerts/final`
+
+### **Description:**
+
+Processes an alert and returns its final classification using either the Random Forest (RF) model or a Reinforcement Learning (RL) adjusted prediction, depending on confidence.
+
+### **Method:** `POST`
+
+### **Content-Type:** `application/json`
+
+### **Request Body:**
+
+```json
+{
+  "description": "<string>",
+  "rule_name": "<string>"
+}
+```
+
+| Field       | Type     | Description                                |
+| ----------- | -------- | ------------------------------------------ |
+| description | `string` | Full textual description of the alert.     |
+| rule\_name  | `string` | Name of the rule that triggered the alert. |
+
+---
+
+### **Response:**
+
+```json
+{
+  "Priority": "<string>",
+  "Taxonomy": "<string>",
+  "Is_FP": <boolean>,
+  "RL_conf": <float>,
+  "RF_conf": <float>,
+  "Used": "RF" | "RL"
+}
+```
+
+| Field    | Type      | Description                                                    |
+| -------- | --------- | -------------------------------------------------------------- |
+| Priority | `string`  | Final predicted alert priority.                                |
+| Taxonomy | `string`  | Final predicted taxonomy (e.g., type of threat or context).    |
+| Is\_FP   | `boolean` | Whether the alert is predicted as a false positive.            |
+| RL\_conf | `float`   | Confidence score from the RL model.                            |
+| RF\_conf | `float`   | Average confidence score from the RF model.                    |
+| Used     | `string`  | Indicates which model's prediction was used: `"RF"` or `"RL"`. |
+
+---
+
+## `/alerts/feedback`
+
+### **Description:**
+
+Accepts analyst feedback for a previously classified alert and schedules a background RL retraining task if criteria are met.
+
+### **Method:** `POST`
+
+### **Content-Type:** `application/json`
+
+### **Request Body:**
+
+```json
+{
+  "description": "<string>",
+  "rule_name": "<string>",
+  "correct_priority": "<string>",
+  "correct_taxonomy": "<string>",
+  "resolution": "<string>"
+}
+```
+
+| Field             | Type     | Description                                                               |
+| ----------------- | -------- | ------------------------------------------------------------------------- |
+| description       | `string` | Alert description provided to the analyst.                                |
+| rule\_name        | `string` | Rule that triggered the alert.                                            |
+| correct\_priority | `string` | Analyst-provided ground-truth priority (e.g., P1, P2, P3, P4).            |
+| correct\_taxonomy | `string` | Analyst-provided ground-truth taxonomy.                                   |
+| resolution        | `string` | Resolution status (e.g., "True Positive", "Duplicate", "Not Applicable"). |
+
+### **Behavior:**
+
+* Feedback is **ignored** and no retraining is triggered if:
+
+  * `correct_priority == "P4"`
+  * `correct_taxonomy == "other"`
+  * `resolution` is one of: `"Duplicate"`, `"Done"`, `"Declined"`, `"Not Applicable/Not confirmed"`
+
+---
+
+### **Response:**
+
+```json
+{
+  "status": "Task queued",
+  "task_id": "<celery_task_id>"
+}
+```
+
+or if skipped:
+
+```json
+{
+  "status": "Training skipped due to feedback conditions."
+}
+```
+
+---
+
+## `/health`
+
+### **Description:**
+
+Verifies that the SOC Bot API service is alive and reachable.
+
+### **Method:** `GET`
+
+### **Response:**
+
+```json
+{
+  "status": "OK"
+}
+```
+
+---
+
+## `/queue_length`
+
+### **Description:**
+
+Returns the current number of tasks waiting in the Celery queue.
+
+### **Method:** `GET`
+
+### **Response:**
+
+```json
+{
+  "queue_length": <integer>
+}
+```
+
+---
+
+## Notes
+
+* The `/alerts/final` endpoint is the primary inference interface.
+* The `/alerts/feedback` endpoint facilitates continuous learning.

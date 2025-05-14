@@ -2,6 +2,7 @@ import numpy as np
 import gymnasium as gym
 from gymnasium import spaces
 import re
+import pandas as pd
 
 import src.config
 from src.logger import with_logger
@@ -72,7 +73,7 @@ class FeedbackEnv(gym.Env):
         self.observation_space = spaces.Box(
             low=-np.inf,
             high=np.inf,
-            shape=(2 + self.embedding_dim,),
+            shape=(3 + self.embedding_dim,),
             dtype=np.float32
         )
         self.action_space = spaces.Box(low=0.0, high=1.0, shape=(4,), dtype=np.float32)
@@ -86,16 +87,26 @@ class FeedbackEnv(gym.Env):
         self.sbert_vectorizer.model_ = SentenceTransformer("paraphrase-MiniLM-L6-v2")
 
     def _get_observation(self):
+        critical_flag = 1 if re.search(
+            r'Related with Critical Asset:\s*\{color:red\}True',
+            self.sample["description"], flags=re.IGNORECASE
+        ) else 0
+
         text = clean_text(self.sample["description"])
         if self.sample["rule_name"].lower() not in text.lower():
             text = f"{text} {self.sample['rule_name']}"
 
-        rf_pred = self.rf_model.predict([text])[0]
+        X = pd.DataFrame([{
+            "Description": text,
+            "CriticalAsset": critical_flag
+        }])
+
+        rf_pred = self.rf_model.predict(X)[0]
         sp = rf_pred[0] / (self.num_priority - 1) if self.num_priority > 1 else 0.0
         st = rf_pred[1] / (self.num_taxonomy - 1) if self.num_taxonomy > 1 else 0.0
         emb = self.sbert_vectorizer.transform([text])[0]
 
-        return np.concatenate(([sp, st], emb)).astype(np.float32)
+        return np.concatenate(([sp, st, critical_flag], emb)).astype(np.float32)
 
     def reset(self, seed=None, options=None):
         self.done = False

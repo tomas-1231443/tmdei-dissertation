@@ -17,7 +17,7 @@ def train_rl_agent_task(feedback, model_version):
     """
     # Call your existing training code; for example:
 
-    dummy_env = RLDummyEnv(observation_dim=386)
+    dummy_env = RLDummyEnv(observation_dim=387)
     rl_agent = PPO.load(src.config.RL_AGENT_PATH, env=dummy_env)
 
     model = load_model(model_version)

@@ -31,7 +31,7 @@ RUN pip install --upgrade pip && \
 COPY data/ data/
 COPY logs/ logs/
 
-COPY src/models/V11/ src/models/V11/
+COPY src/models/V12/model_v12.joblib src/models/V12/
 COPY src/models/__init__.py src/models/model_training.py src/models/rl_agent.zip src/models/
 
 COPY src/preprocessing/ src/preprocessing/
