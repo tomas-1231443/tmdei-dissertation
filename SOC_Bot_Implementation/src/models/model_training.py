@@ -22,7 +22,7 @@ from sklearn.pipeline import FeatureUnion
 from sentence_transformers import SentenceTransformer
 from sklearn.base import BaseEstimator, TransformerMixin
 from src.logger import with_logger
-from src.config import DEFAULT_MODEL_DIR
+from src.config import DEFAULT_MODEL_DIR, DEVICE
 
 
 def get_model_filepath(version: int = None) -> Optional[str]:
@@ -75,10 +75,11 @@ def get_next_version() -> int:
 
 class SentenceBertVectorizer(BaseEstimator, TransformerMixin):
     def __init__(self, model_name="all-MiniLM-L6-v2"):
+        self.device = DEVICE
         self.model_name = model_name
 
     def fit(self, X, y=None):
-        self.model_ = SentenceTransformer(self.model_name)
+        self.model_ = SentenceTransformer(self.model_name, device=self.device)
         return self
 
     def transform(self, X, y=None):

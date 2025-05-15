@@ -84,7 +84,7 @@ class FeedbackEnv(gym.Env):
         # SBERT
         self.sbert_vectorizer = SentenceBertVectorizer("paraphrase-MiniLM-L6-v2")
         from sentence_transformers import SentenceTransformer
-        self.sbert_vectorizer.model_ = SentenceTransformer("paraphrase-MiniLM-L6-v2")
+        self.sbert_vectorizer.model_ = SentenceTransformer("paraphrase-MiniLM-L6-v2", device=src.config.DEVICE)
 
     def _get_observation(self):
         critical_flag = 1 if re.search(

@@ -5,7 +5,7 @@ services:
     networks:
       - soc_net
 
-  bot:
+  soc-bot-cpu:
     image: soc-bot-image
     build:
       context: .
@@ -22,6 +22,40 @@ services:
       - redis
     networks:
       - soc_net
+    command: python -m src.main
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  soc-bot-gpu:
+    image: soc-bot-image
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: soc-bot-gpu
+    profiles: ["gpu"]
+    runtime: nvidia
+    ports:
+      - "8000:8000"
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    volumes:
+      - shared-rl-agent:/app/src/models/
+    depends_on:
+      - redis
+    networks:
+      - soc_net
+    command: python -m src.main --cuda
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
   celery:
     image: soc-bot-image

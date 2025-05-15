@@ -24,7 +24,7 @@ def train_rl_agent_task(feedback, model_version):
     Also logs statistics to Redis per priority and taxonomy.
     """
     dummy_env = RLDummyEnv(observation_dim=387)
-    rl_agent = PPO.load(src.config.RL_AGENT_PATH, env=dummy_env)
+    rl_agent = PPO.load(src.config.RL_AGENT_PATH, env=dummy_env, device=src.config.DEVICE)
     model = load_model(model_version)
 
     guessed_pri = feedback["guessed_priority"]

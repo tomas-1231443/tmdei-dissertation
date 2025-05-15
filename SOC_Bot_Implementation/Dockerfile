@@ -1,7 +1,5 @@
 # Dockerfile
-FROM python:3.10.12-slim
-
-ENV DEBIAN_FRONTEND=noninteractive
+FROM pytorch/pytorch:2.2.2-cuda11.8-cudnn8-runtime
 
 WORKDIR /app
 
@@ -23,10 +21,10 @@ RUN apt-get update && \
     curl && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-COPY requirementsV10.txt .
+COPY requirements.txt .
 
 RUN pip install --upgrade pip && \
-    pip install --no-cache-dir -r requirementsV10.txt
+    pip install --no-cache-dir -r requirements.txt
 
 COPY data/ data/
 COPY logs/ logs/

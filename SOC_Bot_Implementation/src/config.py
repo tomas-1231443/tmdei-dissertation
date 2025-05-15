@@ -1,6 +1,7 @@
 # This file holds any constants or configuration items.
 
 VERBOSE = False
+DEVICE = "cpu"
 
 DEFAULT_MODEL_DIR = "src/models/"
 DEFAULT_EXCEL_PATH = "data/historical_alerts.csv"

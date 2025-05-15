@@ -12,6 +12,7 @@ from sklearn.ensemble import RandomForestClassifier
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from stable_baselines3 import PPO
+import torch
 
 from fastapi.responses import StreamingResponse
 import io
@@ -25,6 +26,8 @@ from src.preprocessing.preprocess import preprocess_bulk_alerts, clean_text
 from src.models.model_training import load_model, train_rf_model, SentenceBertVectorizer
 from src.realtime.qradar_ingestion import process_qradar_alert, RLDummyEnv
 from src.queue.tasks import train_rl_agent_task
+
+from colorama import Fore, Style
 
 # Global variable to store the model once loaded/trained
 model = None
@@ -42,12 +45,8 @@ r = redis.Redis(host=r_host, port=r_port, db=r_db)
 
 training_lock = asyncio.Lock()
     
-### CHANGED: Create a global SBERT vectorizer to avoid reinitializing it multiple times.
 global_sbert_vectorizer = SentenceBertVectorizer(model_name="paraphrase-MiniLM-L6-v2")
-from sentence_transformers import SentenceTransformer
-global_sbert_vectorizer.model_ = SentenceTransformer("paraphrase-MiniLM-L6-v2")
 
-# Define a Pydantic model for incoming alerts.
 class Alert(BaseModel):
     description: str
     rule_name: str
@@ -77,7 +76,7 @@ async def lifespan(app: FastAPI):
 
     if mtime and mtime > last_rl_mtime:
         dummy_env = RLDummyEnv(observation_dim=387)
-        rl_agent = PPO.load(src.config.RL_AGENT_PATH, env=dummy_env)
+        rl_agent = PPO.load(src.config.RL_AGENT_PATH, env=dummy_env, device=src.config.DEVICE)
         last_rl_mtime = mtime
         logger.info(f"Detected updated RL agent on disk; reloaded from {src.config.RL_AGENT_PATH}")
 
@@ -146,18 +145,8 @@ async def process_feedback(feedback: AlertFeedback):
 @app.post("/alerts/final")
 async def process_alert_final(alert: Alert):
     """
-    New endpoint to return the final prediction using RF+RL.
-    The process is as follows:
-      1. Normalize the description and append rule_name if necessary.
-      2. Get the baseline RF prediction and compute scaling factors.
-      3. Compute the SBERT embedding using SentenceBertVectorizer.
-      4. Build an observation vector: [scaled_priority, scaled_taxonomy, embedding].
-      5. If the global RL agent is available, use it to predict an action vector:
-            - Map action[0] to adjusted Priority index (scale and round).
-            - Map action[1] similarly for Taxonomy.
-            - Action[2] threshold (>= 0.5) gives the FP decision.
-            - Action[3] is the confidence score.
-         If RL agent is not available, fall back to the RF model prediction.
+    Processes an alert and returns its final classification using either the Random Forest (RF) model or a 
+    Reinforcement Learning (RL) adjusted prediction, depending on confidence.
     """
     try:
         logger.debug(f"Received MinimalAlert for final prediction: {alert.model_dump_json()}")
@@ -177,7 +166,7 @@ async def process_alert_final(alert: Alert):
 
         if mtime and mtime > last_rl_mtime:
             dummy_env = RLDummyEnv(observation_dim=387)
-            rl_agent = PPO.load(src.config.RL_AGENT_PATH, env=dummy_env)
+            rl_agent = PPO.load(src.config.RL_AGENT_PATH, env=dummy_env, device=src.config.DEVICE)
             last_rl_mtime = mtime
             logger.info(f"Detected updated RL agent on disk; reloaded from {src.config.RL_AGENT_PATH}")
 
@@ -317,18 +306,39 @@ def export_stats_csv():
 @click.option("--retrain", is_flag=True, default=False, help="Retrain the model and overwrite the existing one.")
 @click.option("--tune", is_flag=True, default=False, help="Find the best set of parameters for the model for the current pre-processing.")
 @click.option("--preprocess-only", is_flag=True, default=False, help="Preprocess the historical data only without training the model.")
+@click.option("--cuda", is_flag=True, default=False, help="Enable CUDA acceleration if available.")
 @click.option("--port", default=8000, type=int, help="Port to run the API server on.")
-def main(verbose, excel_path, retrain, model_version, port, preprocess_only, tune):
+def main(verbose, excel_path, retrain, model_version, port, preprocess_only, tune, cuda):
     """
     Main entry point that sets up the model (either by loading or training) and starts the API server.
     """
-    global logger, model, rl_agent, model_v
+    global logger, model, rl_agent, model_v, global_sbert_vectorizer
     model_v = model_version
     src.config.VERBOSE = verbose
     logger = get_logger(__name__)
 
+    device = "cuda" if cuda else "cpu"
+    src.config.DEVICE = device
+
     logger.info("Starting SOC Bot API Server")
-    logger.debug(f"Arguments received - verbose: {verbose}, excel_path: {excel_path}, tune: {tune}, preprocess_only: {preprocess_only}, retrain: {retrain}, model_version: {model_version}, port: {port}")
+    logger.debug(f"Arguments received - verbose: {verbose}, excel_path: {excel_path}, tune: {tune}, preprocess_only: {preprocess_only}, retrain: {retrain}, model_version: {model_version}, port: {port}, cuda: {cuda}")
+
+    logger.info(f"Using device: {src.config.DEVICE}")
+
+    if device == "cuda" and not torch.cuda.is_available():
+        logger.warning(
+            f"{Fore.YELLOW}CUDA requested but unavailable. Falling back to CPU. Please make sure the container is started with GPU access and "
+            f"that the NVIDIA Container Toolkit is installed on the host.\n"
+            "On Ubuntu, run:\n"
+            "  sudo apt install nvidia-container-toolkit\n"
+            "  sudo systemctl restart docker"
+            f"{Style.RESET_ALL}"
+        )
+        device = "cpu"
+        src.config.DEVICE = "cpu"
+
+    from sentence_transformers import SentenceTransformer
+    global_sbert_vectorizer.model_ = SentenceTransformer("paraphrase-MiniLM-L6-v2", device=src.config.DEVICE)
 
     if preprocess_only:
         logger.info("Preprocess-only flag set. Preprocessing the historical data and exiting.")
@@ -354,7 +364,7 @@ def main(verbose, excel_path, retrain, model_version, port, preprocess_only, tun
     dummy_env = RLDummyEnv(observation_dim=387)
     if os.path.exists(src.config.RL_AGENT_PATH):
         try:
-            rl_agent = PPO.load(src.config.RL_AGENT_PATH, env=dummy_env)
+            rl_agent = PPO.load(src.config.RL_AGENT_PATH, env=dummy_env, device=src.config.DEVICE)
             logger.info(f"Loaded RL agent from {src.config.RL_AGENT_PATH}")
         except Exception as e:
             logger.error(f"Error loading RL agent: {e}")
@@ -369,6 +379,7 @@ def main(verbose, excel_path, retrain, model_version, port, preprocess_only, tun
                 gae_lambda=0.9,
                 ent_coef=0.01,
                 verbose=1,
+                device=src.config.DEVICE,
             )
             rl_agent.save(src.config.RL_AGENT_PATH)
             logger.info("Initialized new RL agent due to load error.")
@@ -384,6 +395,7 @@ def main(verbose, excel_path, retrain, model_version, port, preprocess_only, tun
             gae_lambda=0.9,
             ent_coef=0.01,
             verbose=1,
+            device=src.config.DEVICE,
         )
         rl_agent.save(src.config.RL_AGENT_PATH)
         logger.info("Initialized new RL agent as no saved agent was found.")
