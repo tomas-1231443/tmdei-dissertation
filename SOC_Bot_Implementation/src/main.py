@@ -12,6 +12,7 @@ from sklearn.ensemble import RandomForestClassifier
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from stable_baselines3 import PPO
+from sentence_transformers import SentenceTransformer
 import torch
 
 from fastapi.responses import StreamingResponse
@@ -44,15 +45,22 @@ r_db = int(parsed_url.path.replace("/", "") or 0)
 r = redis.Redis(host=r_host, port=r_port, db=r_db)
 
 training_lock = asyncio.Lock()
-    
+
+model = SentenceTransformer("paraphrase-MiniLM-L6-v2")
+
+if not os.path.exists(f"{src.config.DEFAULT_MODEL_DIR}sbert/paraphrase-MiniLM-L6-v2"):
+    model.save(f"{src.config.DEFAULT_MODEL_DIR}sbert/paraphrase-MiniLM-L6-v2")  
+
 global_sbert_vectorizer = SentenceBertVectorizer(model_name="paraphrase-MiniLM-L6-v2")
 
 class Alert(BaseModel):
     description: str
+    critical_asset: bool
     rule_name: str
 
 class AlertFeedback(BaseModel):
     description: str
+    critical_asset: bool
     rule_name: str
     guessed_priority: str
     guessed_taxonomy: str
@@ -112,6 +120,16 @@ async def process_alert(alert: Alert):
     except Exception as e:
         logger.error(f"Error processing alert: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+    
+def clean_label_field(value: str) -> str:
+    """
+    Cleans a label field by:
+    - Stripping whitespace
+    - Removing leading/trailing '~' characters
+    """
+    if not isinstance(value, str):
+        return value
+    return value.strip().strip("~")
 
 @app.post("/alerts/feedback")
 async def process_feedback(feedback: AlertFeedback):
@@ -120,6 +138,9 @@ async def process_feedback(feedback: AlertFeedback):
     """
     # If feedback indicates low-priority or irrelevant taxonomy or a terminal resolution,
     # skip training.
+
+    feedback.correct_taxonomy = clean_label_field(feedback.correct_taxonomy)
+
     terminal_resolutions = {"Duplicate", "Done", "Declined", "Not Applicable/Not confirmed"}
     if (
         feedback.correct_priority == "P4"
@@ -151,11 +172,13 @@ async def process_alert_final(alert: Alert):
     try:
         logger.debug(f"Received MinimalAlert for final prediction: {alert.model_dump_json()}")
 
-        critical_flag = 1 if re.search(
-            r'Related with Critical Asset:\s*\{color:red\}True',
-            alert.description, flags=re.IGNORECASE
-        ) else 0
-        logger.debug(f"CriticalAsset flag: {critical_flag}")
+        # critical_flag = 1 if re.search(
+        #     r'Related with Critical Asset:\s*\{color:red\}True',
+        #     alert.description, flags=re.IGNORECASE
+        # ) else 0
+        # logger.debug(f"CriticalAsset flag: {critical_flag}")
+
+        critical_flag = alert.critical_asset
 
         global rl_agent, last_rl_mtime
 
@@ -170,9 +193,11 @@ async def process_alert_final(alert: Alert):
             last_rl_mtime = mtime
             logger.info(f"Detected updated RL agent on disk; reloaded from {src.config.RL_AGENT_PATH}")
 
-        normalized_text = clean_text(alert.description)
-        if alert.rule_name.lower() not in normalized_text.lower():
-            normalized_text = f"{normalized_text} {alert.rule_name}"
+        # normalized_text = clean_text(alert.description)
+        # if alert.rule_name.lower() not in normalized_text.lower():
+        #     normalized_text = f"{normalized_text} {alert.rule_name}"
+
+        normalized_text = f"{alert.rule_name} - {alert.description}"
         
         # Get baseline RF prediction.
         X_df = pd.DataFrame([{
@@ -337,9 +362,8 @@ def main(verbose, excel_path, retrain, model_version, port, preprocess_only, tun
         device = "cpu"
         src.config.DEVICE = "cpu"
 
-    from sentence_transformers import SentenceTransformer
-    global_sbert_vectorizer.model_ = SentenceTransformer("paraphrase-MiniLM-L6-v2", device=src.config.DEVICE)
-
+    global_sbert_vectorizer.model_ = SentenceTransformer(f"{src.config.DEFAULT_MODEL_DIR}sbert/paraphrase-MiniLM-L6-v2", device=src.config.DEVICE)
+    
     if preprocess_only:
         logger.info("Preprocess-only flag set. Preprocessing the historical data and exiting.")
         preprocess(excel_path)

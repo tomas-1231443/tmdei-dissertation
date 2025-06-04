@@ -76,10 +76,15 @@ def get_next_version() -> int:
 class SentenceBertVectorizer(BaseEstimator, TransformerMixin):
     def __init__(self, model_name="all-MiniLM-L6-v2"):
         self.device = DEVICE
+        self.model_path = f"{DEFAULT_MODEL_DIR}sbert/paraphrase-MiniLM-L6-v2"
         self.model_name = model_name
 
     def fit(self, X, y=None):
         self.model_ = SentenceTransformer(self.model_name, device=self.device)
+        if os.path.exists(self.model_path):
+            self.model_ = SentenceTransformer(self.model_path, device=self.device)
+        else:
+            self.model_ = SentenceTransformer(self.model_name, device=self.device)
         return self
 
     def transform(self, X, y=None):

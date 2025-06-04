@@ -30,6 +30,7 @@ COPY data/ data/
 COPY logs/ logs/
 
 COPY src/models/DockerVersion src/models/V1
+COPY src/models/sbert src/models/sbert
 COPY src/models/__init__.py src/models/model_training.py src/models/
 
 COPY src/preprocessing/ src/preprocessing/

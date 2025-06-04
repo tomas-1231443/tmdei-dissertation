@@ -84,17 +84,21 @@ class FeedbackEnv(gym.Env):
         # SBERT
         self.sbert_vectorizer = SentenceBertVectorizer("paraphrase-MiniLM-L6-v2")
         from sentence_transformers import SentenceTransformer
-        self.sbert_vectorizer.model_ = SentenceTransformer("paraphrase-MiniLM-L6-v2", device=src.config.DEVICE)
+        self.sbert_vectorizer.model_ = SentenceTransformer(f"{src.config.DEFAULT_MODEL_DIR}sbert/paraphrase-MiniLM-L6-v2", device=src.config.DEVICE)
 
     def _get_observation(self):
-        critical_flag = 1 if re.search(
-            r'Related with Critical Asset:\s*\{color:red\}True',
-            self.sample["description"], flags=re.IGNORECASE
-        ) else 0
+        # critical_flag = 1 if re.search(
+        #     r'Related with Critical Asset:\s*\{color:red\}True',
+        #     self.sample["description"], flags=re.IGNORECASE
+        # ) else 0
 
-        text = clean_text(self.sample["description"])
-        if self.sample["rule_name"].lower() not in text.lower():
-            text = f"{text} {self.sample['rule_name']}"
+        critical_flag = self.sample["critical_asset"]
+
+        # text = clean_text(self.sample["description"])
+        # if self.sample["rule_name"].lower() not in text.lower():
+        #     text = f"{text} {self.sample['rule_name']}"
+
+        text = f"{self.sample['rule_name']} - {self.sample['description']}"
 
         X = pd.DataFrame([{
             "Description": text,
@@ -163,13 +167,14 @@ def update_rl_agent_with_feedback(feedback: dict, model, rl_agent, *, logger):
 
     sample = {
         "description": feedback["description"],
+        "critical_asset": feedback["critical_asset"],
         "rule_name": feedback["rule_name"],
         "correct_priority": feedback["correct_priority"],
         "correct_taxonomy": feedback["correct_taxonomy"],
         "feedback_label": ground_truth_fp
     }
 
-    env = FeedbackEnv(sample, model["pipeline"], (model["le_priority"], model["le_taxonomy"]), embedding_dim=384)
+    env = FeedbackEnv(sample, model["pipeline"], (model["le_priority"], model["le_taxonomy"]), embedding_dim=387)
     obs, _ = env.reset()
 
     # ensure PPO has correct env

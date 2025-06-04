@@ -1,93 +1,224 @@
-# SOC Bot for Security Alerts Triage
+# 🛡️ SOC Bot – Security Alert Triage Automation
 
 ## Overview
 
-This project is a proof-of-concept bot designed to automate the triage of security alerts in a Security Operations Center (SOC). It processes historical alert data from Excel files for model training and is structured to later support real-time alert ingestion (e.g., from QRadar). The design emphasizes modularity, scalability, and maintainability.
+SOC Bot is an intelligent, ML-driven triage assistant for Security Operations Centers (SOCs). It combines traditional machine learning (Random Forest) with reinforcement learning (Stable Baselines3 PPO) to classify, prioritize, and flag incoming security alerts. It is designed to:
 
-## Directory Structure
+* Automate alert classification (priority + taxonomy)
+* Predict if an alert is a false positive
+* Learn continuously from analyst feedback
+* Integrate seamlessly with QRadar, SOAR, and similar platforms
+* Run with or without GPU acceleration (via CUDA)
+
+This project supports both batch learning from historical data (Excel) and real-time inference through a REST API.
+
+---
+
+## 📁 Project Structure
 
 ```
 my_soc_bot/
-├── data/                      # Sample/test data (e.g., Excel files with historical alerts)
-├── docs/                      # Documentation and diagrams (e.g., bot architecture, WBS)
-├── logs/                      # (Optional) Log files directory
-├── src/                       # Source code for the bot
-│   ├── __init__.py
-│   ├── main.py              # Main entry point; sets up logging and orchestrates processing
-│   ├── logger.py            # Centralized logging configuration for uniform log formatting
-│   ├── config.py            # Global configuration (e.g., file paths, verbosity setting)
-│   ├── preprocessing/       # Data cleaning and normalization routines
-│   │   ├── __init__.py
-│   │   └── preprocess.py    # Functions to process single alerts and bulk Excel data
-│   ├── models/              # Future module for ML model training and evaluation
-│   │   ├── __init__.py
-│   │   └── model_training.py # Example training logic (e.g., false-positive detection)
-│   └── realtime/            # Module for handling real-time alert ingestion (e.g., QRadar alerts)
-│       ├── __init__.py
-│       └── qradar_ingestion.py # Converts and preprocesses real-time JSON alerts
-├── tests/                     # Unit and integration tests for various modules
-│   └── test_preprocessing.py
-├── requirements.txt           # Project dependencies
-└── README.md                  # This documentation file
+├── data/                      # Sample historical alert data
+├── docs/                      # Architecture diagrams, WBS
+├── logs/                      # Output logs for debug/audit
+├── src/                       # All source code modules
+│   ├── main.py                # CLI + FastAPI app
+│   ├── logger.py              # Centralized logging
+│   ├── config.py              # Global configuration and device selection
+│   ├── preprocessing/         # Preprocessing logic for alerts
+│   ├── models/                # ML + RL model loading/training
+│   └── realtime/              # Real-time ingestion and reinforcement feedback
+├── tests/                     # Unit/integration tests
+├── requirements.txt           # Python dependencies
+├── Dockerfile                 # CUDA-compatible container image
+├── docker-compose.yml         # Multi-container setup with profiles
+├── README.md                  # You're here.
+├── DEPLOY.md                  # Deployment instructions (Docker, GPU)
+└── API.md                     # REST API endpoint documentation
 ```
 
-## Key Components
+---
 
-### `src/main.py`
-- **Purpose:** Acts as the CLI entry point.
-- **Details:**
-  - Parses command-line options (e.g., `-v` for verbose logging).
-  - Configures the root logger so all modules use the same logging level.
-  - Loads data, initiates preprocessing, and eventually triggers model training.
+## ⚙️ Key Features
 
-### `src/logger.py`
-- **Purpose:** Provides a `get_logger()` function for consistent logging.
-- **Details:**
-  - Ensures a uniform log format (timestamps, log level, module name, etc.) across the project.
-  - Loggers inherit the configuration set in `main.py` (using the root logger or a global configuration).
+* 📊 Hybrid ML architecture: Random Forest + RL (PPO)
+* 🧠 Learns from analyst feedback via Celery background training tasks
+* 🌐 Real-time inference via FastAPI
+* 🛠️ Fully containerized: `bot`, `celery`, `redis`, `flower`
+* 🔥 GPU acceleration via CUDA (optional)
+* 📈 Task queue monitoring via Flower
+* 📦 Redis-backed statistics tracking for model accuracy
+* 📤 API-based export of training statistics to CSV
+* 🧪 Testable, modular, production-ready architecture
 
-### `src/config.py`
-- **Purpose:** Stores global configuration values.
-- **Details:**
-  - Includes constants like default file paths and verbosity settings.
-  - Can be extended as additional configuration items are needed.
+---
 
-### `src/preprocessing/preprocess.py`
-- **Purpose:** Contains routines to clean and normalize alert data.
-- **Details:**
-  - Offers functions for processing both single alerts (for real-time use) and entire DataFrames (for Excel data).
-  - Performs tasks such as lowercasing text, removing punctuation, and trimming whitespace.
+## 🚀 Getting Started
 
-### `src/models/model_training.py`
-- **Purpose:** Placeholder for ML model training.
-- **Details:**
-  - Includes example code (using a Random Forest) for training a false-positive detector.
-  - Uses the centralized logger instead of print statements for uniform logging.
+### 🐍 1. Install Python dependencies (local dev)
 
-### `src/realtime/qradar_ingestion.py`
-- **Purpose:** Handles real-time alert ingestion from QRadar.
-- **Details:**
-  - Converts JSON alerts to the same format as the Excel data.
-  - Calls the shared preprocessing functions to ensure consistency across historical and live data.
+```bash
+pip install -r requirements.txt
+```
 
-## Setup and Execution
+### ▶️ 2. Run the bot locally (CPU mode)
 
-1. **Install Dependencies:**
+```bash
+python -m src.main --excel-path data/sample_alerts.xlsx --verbose
+```
+
+Optional arguments:
+
+* `--retrain`: Retrain the RF model
+* `--cuda`: Enable GPU support (if available)
+* `--model-version N`: Load a specific model version
+* `--port 8000`: Set custom API port
+
+---
+
+## 🧠 How It Works
+
+1. Loads a trained Random Forest model from disk (`/src/models/V*/`).
+2. Loads a PPO RL agent (`rl_agent.zip`) to refine predictions.
+3. Receives alerts via the `/alerts/final` API or Excel batch.
+4. Normalizes and vectorizes alerts (SBERT + critical asset flag).
+5. Combines ML and RL outputs to classify:
+
+   * Priority (P1–P4)
+   * Taxonomy (e.g., malware, C2, phishing)
+   * Is false positive?
+6. Analyst feedback is sent to `/alerts/feedback`, which enqueues a Celery task that:
+
+   * Re-evaluates the decision
+   * Trains the RL agent for a few steps
+   * Logs accuracy stats to Redis
+
+---
+
+## 🔗 REST API
+
+For complete details on endpoints, parameters, payloads, and responses, see:
+
+📄 [`API.md`](API.md)
+
+Key endpoints include:
+
+* `POST /alerts/final`: Final prediction using RF + RL
+* `POST /alerts/feedback`: Submit analyst feedback
+* `GET /health`: Health check
+* `GET /queue_length`: Celery queue size
+* `GET /stats/export`: Export model accuracy stats as CSV
+
+---
+
+## ⚙️ GPU & CUDA Support
+
+This bot can optionally use GPU acceleration for:
+
+* SBERT vectorization (via `sentence-transformers`)
+* PPO reinforcement learning (via PyTorch)
+
+To enable:
+
+1. Install [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html):
 
    ```bash
-   pip install -r requirements.txt
+   sudo apt install -y nvidia-container-toolkit
+   sudo systemctl restart docker
    ```
+2. Start the container with `--cuda` flag and `runtime: nvidia` (see below).
 
-2. **Run the Bot:**
+---
 
-   ```bash
-   python -m src.main --excel-path data/sample_alerts.xlsx -v
-   ```
+## 🐳 Docker Deployment
 
-   The `-v` flag enables verbose (DEBUG) logging across all modules.
+Containerized via `docker-compose.yml` with optional CUDA support.
 
-## Future Development
+📄 See [`DEPLOY.md`](DEPLOY.md) for detailed steps.
 
-- **Enhanced Model Training:** Expand the training pipeline with additional ML algorithms for false-positive detection and alert classification.
-- **Real-Time Processing:** Enhance the real-time ingestion module to handle live feeds from systems like QRadar.
-- **Comprehensive Testing:** Extend the test suite in the `tests/` directory to improve coverage and reliability.
+### Run in CPU mode:
+
+```bash
+docker compose up --build
+```
+
+### Run in GPU mode (if available):
+
+```bash
+docker compose --profile gpu up --build
+```
+
+Services:
+
+* `bot` / `bot-gpu`: API with/without CUDA
+* `celery`: Handles feedback training
+* `flower`: Dashboard on port `5555`
+* `redis`: Message broker and stats store
+
+---
+
+## 📊 Monitoring & Metrics
+
+* Flower UI available at: [http://localhost:5555](http://localhost:5555)
+* Daily Redis stats by:
+
+  * `taxonomy` and `priority`
+  * correct/incorrect predictions
+  * exportable as CSV
+
+---
+
+## 📦 Dependencies
+
+* Python 3.10
+* PyTorch (with optional CUDA)
+* FastAPI, Uvicorn
+* scikit-learn
+* stable-baselines3
+* sentence-transformers
+* Celery + Redis
+* Flower
+
+See `requirements.txt` for full list.
+
+---
+
+## ✅ Feedback Loop
+
+The RL agent is updated incrementally:
+
+* Alerts classified with RF + RL
+* Feedback is submitted via API
+* A Celery task evaluates correctness and trains the PPO model
+* Accuracy stats are logged by `priority` and `taxonomy`
+* Can be analyzed daily for improvement tracking
+
+---
+
+## 🧪 Testing
+
+Basic tests live under `tests/`. Run via:
+
+```bash
+pytest
+```
+
+---
+
+## 📌 Notes
+
+* All model versions are stored under `src/models/V*/`
+* Latest RL agent is always saved as `rl_agent.zip`
+* Volumes ensure shared model state between containers
+* Logs written to `logs/` folder
+* Supports graceful fallback from CUDA → CPU if GPU unavailable
+
+---
+
+## 📚 Related Docs
+
+* 📄 [`API.md`](API.md) – REST API spec
+* 📄 [`DEPLOY.md`](DEPLOY.md) – Docker + GPU deployment
+---
+
+Let me know if you'd like this in Markdown, PDF, or embedded into your repository automatically.

@@ -15,4 +15,6 @@ SOC_Bot_Implementation/.idea/
 
 *.joblib
 SOC_Bot_Implementation/src/models/rl_agent.zip
-deploy-releaseV1.0.zip
+SOC_Bot_Implementation/src/models/sbert/*
+
+testing-releaseV*.zip
