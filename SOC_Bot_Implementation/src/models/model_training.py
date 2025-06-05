@@ -88,8 +88,9 @@ class SentenceBertVectorizer(BaseEstimator, TransformerMixin):
         return self
 
     def transform(self, X, y=None):
-        # X is expected to be an iterable of text strings.
-        return self.model_.encode(list(X), show_progress_bar=True)
+        embeddings = self.model_.encode(list(X), show_progress_bar=True)
+        # print(f"[DEBUG] SBERT embedding shape: {embeddings.shape}")
+        return embeddings
 
 @with_logger
 def train_rf_model(df: pd.DataFrame, tune: bool = False, *, logger) -> Dict[str, Any]:

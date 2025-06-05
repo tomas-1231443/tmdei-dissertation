@@ -110,6 +110,9 @@ class FeedbackEnv(gym.Env):
         st = rf_pred[1] / (self.num_taxonomy - 1) if self.num_taxonomy > 1 else 0.0
         emb = self.sbert_vectorizer.transform([text])[0]
 
+        # print(f"[FEEDBACK ENV] embedding shape: {emb.shape}")
+        # print(f"[FEEDBACK ENV] obs shape: {np.concatenate(([sp, st, critical_flag], emb)).shape}")
+
         return np.concatenate(([sp, st, critical_flag], emb)).astype(np.float32)
 
     def reset(self, seed=None, options=None):
@@ -174,7 +177,7 @@ def update_rl_agent_with_feedback(feedback: dict, model, rl_agent, *, logger):
         "feedback_label": ground_truth_fp
     }
 
-    env = FeedbackEnv(sample, model["pipeline"], (model["le_priority"], model["le_taxonomy"]), embedding_dim=387)
+    env = FeedbackEnv(sample, model["pipeline"], (model["le_priority"], model["le_taxonomy"]), embedding_dim=384)
     obs, _ = env.reset()
 
     # ensure PPO has correct env
