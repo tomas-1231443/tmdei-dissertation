@@ -46,10 +46,10 @@ r = redis.Redis(host=r_host, port=r_port, db=r_db)
 
 training_lock = asyncio.Lock()
 
-model = SentenceTransformer("paraphrase-MiniLM-L6-v2")
+model_bert = SentenceTransformer("paraphrase-MiniLM-L6-v2")
 
 if not os.path.exists(f"{src.config.DEFAULT_MODEL_DIR}sbert/paraphrase-MiniLM-L6-v2"):
-    model.save(f"{src.config.DEFAULT_MODEL_DIR}sbert/paraphrase-MiniLM-L6-v2")  
+    model_bert.save(f"{src.config.DEFAULT_MODEL_DIR}sbert/paraphrase-MiniLM-L6-v2")  
 
 global_sbert_vectorizer = SentenceBertVectorizer(model_name="paraphrase-MiniLM-L6-v2")
 
@@ -121,15 +121,17 @@ async def process_alert(alert: Alert):
         logger.error(f"Error processing alert: {e}")
         raise HTTPException(status_code=500, detail=str(e))
     
-def clean_label_field(value: str) -> str:
+def normalize_label(value: str) -> str:
     """
-    Cleans a label field by:
-    - Stripping whitespace
-    - Removing leading/trailing '~' characters
+    Fully normalize label: remove non-alphanumerics, capitalize words.
     """
     if not isinstance(value, str):
         return value
-    return value.strip().strip("~")
+    # Replace non-alphanumeric characters with spaces
+    value = re.sub(r'[^a-zA-Z]+', ' ', value)
+    # Split, capitalize, join
+    words = value.strip().split()
+    return ' '.join(word.capitalize() for word in words)
 
 @app.post("/alerts/feedback")
 async def process_feedback(feedback: AlertFeedback):
@@ -139,7 +141,19 @@ async def process_feedback(feedback: AlertFeedback):
     # If feedback indicates low-priority or irrelevant taxonomy or a terminal resolution,
     # skip training.
 
-    feedback.correct_taxonomy = clean_label_field(feedback.correct_taxonomy)
+    global model, logger
+
+    feedback.correct_taxonomy = normalize_label(feedback.correct_taxonomy)
+    feedback.guessed_taxonomy = normalize_label(feedback.guessed_taxonomy)
+
+    priority_map = {
+        "High": "P1",
+        "Medium": "P2",
+        "Low": "P3",
+    }
+
+    feedback.correct_priority = priority_map.get(feedback.correct_priority, feedback.correct_priority)
+    feedback.guessed_priority = priority_map.get(feedback.guessed_priority, feedback.guessed_priority)
 
     terminal_resolutions = {"Duplicate", "Done", "Declined", "Not Applicable/Not confirmed"}
     if (
@@ -152,6 +166,20 @@ async def process_feedback(feedback: AlertFeedback):
             f"taxonomy={feedback.correct_taxonomy}, resolution={feedback.resolution})"
         )
         return {"status": "Training skipped due to feedback conditions."}
+
+    valid_taxonomies = set(model["le_taxonomy"].classes_)
+    valid_priorities = set(model["le_priority"].classes_)
+
+    logger.debug(f"Valid taxonomies: {valid_taxonomies}")
+    logger.debug(f"Valid priorities: {valid_priorities}")
+
+    if feedback.correct_taxonomy not in valid_taxonomies:
+        logger.warning(f"Received unknown taxonomy '{feedback.correct_taxonomy}'. Skipping.")
+        return {"status": f"Skipped: unknown taxonomy '{feedback.correct_taxonomy}'."}
+
+    if feedback.correct_priority not in valid_priorities:
+        logger.warning(f"Received unknown priority '{feedback.correct_priority}'. Skipping.")
+        return {"status": f"Skipped: unknown priority '{feedback.correct_priority}'."}
 
     # Otherwise enqueue the task
     try:
@@ -423,6 +451,12 @@ def main(verbose, excel_path, retrain, model_version, port, preprocess_only, tun
         )
         rl_agent.save(src.config.RL_AGENT_PATH)
         logger.info("Initialized new RL agent as no saved agent was found.")
+
+    # valid_taxonomies = set(model["le_taxonomy"].classes_)
+    # valid_priorities = set(model["le_priority"].classes_)
+
+    # logger.debug(f"Valid taxonomies: {valid_taxonomies}")
+    # logger.debug(f"Valid priorities: {valid_priorities}")
 
     logger.info("RF model and RL agent are ready. Starting API server...")
     
