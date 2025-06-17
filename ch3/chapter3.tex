@@ -328,7 +328,11 @@ To prepare the data for training ML models, several key preprocessing steps were
 Rows missing data in "Priority" or "Taxonomy" were removed, retaining only the essential columns: "Description", "Priority", and "Taxonomy". 
 These columns provide the text for training and the target labels.
 
-Listing~\ref{lst:first_preprocessing} shows the Python code snippet used for this initial preprocessing step.
+Listing~\ref{lst:first_preprocessing} shows the Python code snippet used for this initial preprocessing step. 
+In line 1, the dataset is filtered to exclude alerts where the 'Source' field is marked as 'Other' and to retain only those rows where the 'Source Alert Rule Name' field is not empty. 
+In line 2, the list of columns relevant for the model training is defined, selecting only 'Description', 'Priority', and 'Taxonomy'. 
+Line 3 applies this selection to the dataset, keeping only the specified columns. 
+Finally, in line 4, any remaining rows that still contain missing values in these essential columns are removed to ensure the completeness of the dataset used for training.
 
 \vspace{0.2cm}
 \noindent
@@ -350,6 +354,10 @@ To address class imbalance in the Taxonomy column, random oversampling was perfo
 This involved ensuring that smaller categories had enough examples for the model by duplicating instances from underrepresented taxonomies until they matched the size of the largest category.
 
 Listing~\ref{lst:second_preprocessing} provides the Python code snippet used for the second preprocessing step, which includes filtering and oversampling to address class imbalance in the dataset. 
+In line 1, rows where the priority is "P4" or taxonomy is "Other" are excluded to retain only relevant data for classification. 
+In line 2, the distribution of samples across taxonomies is calculated. 
+Line 9 performs the oversampling by randomly duplicating instances of underrepresented taxonomies to balance the dataset. 
+Finally, in line 12, all oversampled subsets are concatenated into a single balanced dataset.
 
 \vspace{0.2cm}
 \noindent
@@ -383,6 +391,7 @@ Unnecessary formatting was removed as well as special characters, and irrelevant
 It also handled tasks like stripping extra whitespace and removing HTML tags, ensuring the text was in a consistent and usable format for the machine learning pipeline.
 
 Listing~\ref{lst:third_preprocessing} shows the Python code snippet used for this third preprocessing step.
+When this line is executed, the clean\_text function is applied to each row of the Description column, systematically cleaning and normalizing the text, while progress\_apply provides a visual progress bar during the operation to monitor execution.
 
 \vspace{0.2cm}
 \noindent
@@ -404,6 +413,7 @@ The rules defined for normalizing the description text will be detailed in the n
 Finally, the "Priority" and "Taxonomy" labels were stripped of any leading or trailing spaces to ensure consistency in the dataset. 
 
 Listing~\ref{lst:fourth_preprocessing} shows the Python code snippet used for this final preprocessing step.
+In lines 1 and 2, both the Priority and Taxonomy columns are first explicitly converted to string to prevent type inconsistencies, and then any leading or trailing whitespace were removed to ensure label consistency across the dataset.
 
 \vspace{0.2cm}
 \noindent
@@ -449,7 +459,7 @@ This function specifically targets common issues in textual data, such as extran
 \end{figure}
 
 Figure~\ref{fig:redacted_description_text} presents a redacted\footnote{For privacy reasons, the actual data has been censored or altered to ensure confidentiality.} visualization that exemplifies the typical format of a description text.
-The formatting of this description may differ based on the source of the alert, highlighting the diverse origins and structures of the data. 
+The formatting of this description may differ based on the source of the alert, for example, some information may not appear at all or the description text formatting is different, highlighting the diverse origins and structures of the data. 
 To address these variations, the \texttt{clean\_text} function was created to standardize the presentation of the text data, ensuring it remains consistent regardless of its source.
 
 The \texttt{clean\_text} function performs several key operations:
@@ -473,7 +483,7 @@ This division is crucial because it allows the model to be trained on one subset
 This prevents overfitting, where the model performs well on training data but fails to generalize to new, unseen data. 
 
 Similarly, proper dataset division also avoids underfitting, where the model might not learn enough from the training data to perform well.
-\clearpage
+
 In ML, the dataset is typically divided into three parts:
 \begin{itemize}
     \item \textbf{Training Set:} Used to train the model.
@@ -484,7 +494,7 @@ In ML, the dataset is typically divided into three parts:
 In this project, the dataset was divided as follows:
 
 \begin{itemize}
-    \item \textbf{Training and Test Split:} The data was split into 70\% for training and 30\% for testing. This ratio strikes a balance between providing enough data for the model to learn from, while still maintaining a sufficient amount of data to test its generalization ability. This approach was chosen to maximize the model's ability to generalize to unseen data while preventing overfitting.
+    \item \textbf{Training and Test Split:} The data was split into 70\% for training and 30\% for testing. This ratio strikes a balance between providing enough data for the model to learn from, while still maintaining a sufficient amount of data to test its generalization ability. Listing~\ref{lst:dataset_split} shows the Python code used to perform the dataset split. The train\_test\_split function divides the feature set X and the labels Y into training and testing subsets, while preserving the class distribution across both sets through stratification with the stratify parameter. This approach was chosen to maximize the model's ability to generalize to unseen data while preventing overfitting.
 \end{itemize}
 
 \vspace{0.2cm}
@@ -499,7 +509,7 @@ X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.3, random_
 \vspace{0.1cm}
 
 \begin{itemize}
-    \item \textbf{Stratified Sampling:} The split was performed using stratified sampling, ensuring that the proportion of each class in Priority and Taxonomy was maintained across the training and test sets. This helps avoid bias in the dataset and ensures that both the training and test sets have representative distributions of all classes.
+    \item \textbf{Stratified Sampling:} The split was performed using stratified sampling, ensuring that the proportion of each class in Priority and Taxonomy was maintained across the training and test sets. Listing~\ref{lst:stratified_sampling} illustrates how stratified sampling was implemented. In the first line, the list stratify\_labels is created by converting each row of Y into a tuple, combining both Priority and Taxonomy labels. This ensures that the stratification process maintains the joint distribution of both target variables during the subsequent data split performed by train\_test\_split. This helps avoid bias in the dataset and ensures that both the training and test sets have representative distributions of all classes.
 \end{itemize}
 
 \vspace{0.2cm}
@@ -548,6 +558,10 @@ X = vectorizer.fit_transform(df["Description"])
 \end{minipage}
 \vspace{0.1cm}
 
+Listing~\ref{lst:vectorizing_text_data} presents the code used for the text vectorization step. 
+In the first line, the \texttt{SentenceBertVectorizer} is initialized with the pre-trained model \texttt{"paraphrase-MiniLM-L6-v2"}. 
+In the second line, the \texttt{fit\_transform} function converts all entries from the \textit{Description} column into numerical embeddings that serve as feature vectors for model training.
+
 Once the text data is vectorized, the target labels (Priority and Taxonomy) are encoded using LabelEncoder. 
 This step converts the categorical labels into numeric form, making them suitable for input into the RF model.
 
@@ -569,6 +583,11 @@ Y = np.column_stack((y_priority, y_taxonomy))
 \end{minipage}
 \vspace{0.1cm}
 
+Listing~\ref{lst:encoding_target_labels} shows the encoding process. 
+In lines 1 and 2, two \texttt{LabelEncoder} instances are initialized, one for each target. 
+Lines 3 and 4 transform the textual labels into integer representations. 
+Finally, in line 8, both encoded targets are combined into a two-dimensional array \texttt{Y}, allowing the model to predict both outputs simultaneously.
+
 Next, the dataset is split into training and testing sets using train\_test\_split from scikit-learn. 
 This ensures that the model is trained on one subset of data and evaluated on another, providing an unbiased assessment of its performance.
 
@@ -583,6 +602,10 @@ X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.3, random_
 \label{lst:splitting_dataset}
 \end{minipage}
 \vspace{0.1cm}
+
+Listing~\ref{lst:splitting_dataset} shows the dataset splitting process. 
+The \texttt{train\_test\_split} function allocates 70\% of the data for training and 30\% for testing. 
+The \texttt{stratify} parameter ensures that the class distribution for both \textbf{Priority} and \textbf{Taxonomy} remains consistent across both sets, preserving representativeness and preventing class imbalance during training.
 
 After splitting the data, the RandomForestClassifier is initialized and wrapped with MultiOutputClassifier to handle the multi-output prediction task. 
 The model is trained on the training data and evaluated on the test set. 
@@ -600,6 +623,10 @@ multi_rf.fit(X_train, Y_train)
 \label{lst:training_rf_model}
 \end{minipage}
 \vspace{0.1cm}
+
+Listing~\ref{lst:training_rf_model} details the model initialization and training. 
+In line 1, the \texttt{RandomForestClassifier} is configured with specific hyperparameters optimized during prior experimentation. 
+In line 2, it is wrapped with \texttt{MultiOutputClassifier} to handle multiple outputs, and in line 3, the model is trained on the training dataset.
 
 \subsubsection{Reinforcement Learning Model Implementation}
 
@@ -668,7 +695,7 @@ Here's an example of how the RL training task is defined using Celery:
 \begin{minted}{python}
 @celery_app.task
 def train_rl_agent_task(feedback, model_version):
-    dummy_env = RLDummyEnv(observation_dim=386)
+    dummy_env = RLDummyEnv(observation_dim=387)
     rl_agent = PPO.load(src.config.RL_AGENT_PATH, env=dummy_env)
 
     model = load_model(model_version)
@@ -679,6 +706,13 @@ def train_rl_agent_task(feedback, model_version):
 \label{lst:rl_training_task}
 \end{minipage}
 \vspace{0.1cm}
+
+Listing~\ref{lst:rl_training_task} illustrates how the RL training task is defined asynchronously using Celery. 
+In line 1, the function is registered as a Celery task. 
+In line 2, a dummy reinforcement learning environment is instantiated to match the model's observation space. 
+In line 3, the pre-existing RL agent is loaded from storage. 
+In line 5, the corresponding Random Forest model version is loaded to provide context for the RL update. 
+Finally, in line 6, the function update\_rl\_agent\_with\_feedback applies the feedback to refine the RL model, and the updated training information is returned.
 
 This asynchronous processing model allows the RL agent to continuously improve based on real-time feedback while ensuring that the system remains responsive to new alert data.
 Although, for this to happen the RL model need to be trained in a separate process to ensure efficient and uninterrupted training. 
@@ -722,6 +756,10 @@ multi_rf = MultiOutputClassifier(base_rf)
 \label{lst:rf_model_initialization}
 \end{minipage}
 \vspace{0.1cm}
+
+Listing~\ref{lst:rf_model_initialization} shows the initialization of the Random Forest model with the selected hyperparameters. 
+In line 1, the \texttt{RandomForestClassifier} is instantiated with 500 estimators, a maximum tree depth of 40, a minimum of 10 samples required to split an internal node, and balanced class weights to handle class imbalance. 
+In line 2, the classifier is wrapped with \texttt{MultiOutputClassifier} to enable simultaneous prediction of both \textbf{Priority} and \textbf{Taxonomy} labels.
 
 For the \gls{RL} model, a similar approach was used, but the model's hyperparameters, such as learning rate, batch size, and the number of epochs, were fine-tuned to ensure that the model could learn efficiently from feedback while maintaining stability in training. 
 The PPO algorithm was used, which is known for its stability and effectiveness in reinforcement learning tasks. 

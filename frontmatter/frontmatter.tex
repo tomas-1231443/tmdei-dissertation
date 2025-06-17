@@ -34,9 +34,17 @@
 
 % here you put the abstract in the main language of the work.
 
-Threats to Cybersecurity have grown ever more sophisticated over the years, making Security Operations Centres (SOC) more important than ever. 
-The topic of this dissertation is the application of Machine Learning (ML) to automate the triage of security alerts, addressing issues such as alert fatigue and false positives. 
-The research proposes leveraging ML models to improve existing Security Information and Event Management (SIEM) systems by classifying alerts, prioritizing actionable threats, and thus enabling fast detection and response times.
+Threats to Cybersecurity have grown ever more sophisticated over the years, making \gls{SOC} more important than ever. 
+
+This dissertation explores the application of \gls{ML} to automate the triage of security alerts, addressing alert fatigue and high false positive rates.
+The solution integrates a \gls{RF} model, trained on historical \gls{SOC} data, with a \gls{RL} feedback loop that dynamically adapts to analyst input over time.
+A comprehensive review of \gls{SIEM} systems, ticketing tools, and \gls{ML} frameworks was conducted to support the development of this system.
+
+The research involved real-world deployment within a production \gls{SOC} environment, using live data from ArtResilia's infrastructure.
+The proposed solution demonstrated significant improvements across key metrics, increasing classification accuracy for both alert priority and taxonomy after iterative refinement.
+
+Moreover, the adaptive \gls{RL} feedback loop appeared to enable continuous improvement while maintaining model stability.
+The findings suggest that integrating \gls{ML} and \gls{RL} into \gls{SOC} workflows may help reduce false positives, improve response times, and alleviate analyst workload, potentially contributing to enhanced overall resilience.
 
 \end{abstract}
 
@@ -44,10 +52,38 @@ The research proposes leveraging ML models to improve existing Security Informat
 % here you put the abstract in the "other language": English, if the work is written in Portuguese; Portuguese, if the work is written in English.
 
 A crescente complexidade e frequência das ameaças cibernéticas têm destacado a importância dos Centros de Operações de Segurança (SOC) na defesa de organizações contra incidentes de segurança. 
-Este trabalho investiga a aplicação de técnicas de Aprendizagem Automática (ML) para automatizar a triagem de alertas de segurança, reduzindo os desafios enfrentados pelos analistas, como a fatiga causada pelo alto volume de alertas e a alta taxa de falsos positivos. 
-A integração de modelos de ML com sistemas de Gestão de Informações e Eventos de Segurança (SIEM) procura melhorar a eficiência da classificação de alertas, priorizar ameaças críticas e reduzir os tempos médios de detecção e resposta.
 
-Este trabalho inclui uma avaliação dos principais sistemas SIEM, ferramentas de gestão de tickets e frameworks de ML, destacando as suas vantagens e limitações em ambientes SOC. 
+Os problemas abordados neste trabalho emergem da necessidade crescente de eficiência nos processos iniciais de triagem. 
+As equipas SOC lidam diariamente com milhares de alertas, sendo uma parte considerável destes irrelevantes ou falsos positivos. 
+Esta sobrecarga compromete não apenas o desempenho operacional dos analistas, mas também o tempo de deteção (MTTD) e o tempo de resposta (MTTR) da organização, aumentando o risco de incidentes não detetados ou tardiamente priorizados.
+
+Para enfrentar estes desafios, foi concebida uma solução baseada na integração de modelos de ML com o ecossistema já existente de ferramentas SIEM e de gestão de incidentes. 
+A metodologia desenvolvida contemplou uma extensa revisão bibliográfica, analisando os principais sistemas SIEM, plataformas de gestão de tickets, bem como frameworks de ML, avaliando as respetivas vantagens, limitações e adequação a ambientes SOC.
+
+O modelo desenvolvido neste trabalho adota uma arquitetura híbrida e modular, composta por duas camadas principais. 
+Na primeira camada, um modelo Random Forest (RF) foi treinado com um conjunto de dados históricos disponibilizado pela ArtResilia, empresa onde decorreu a investigação e a implementação prática da solução. 
+Este dataset continha cerca de 100 mil alertas registados entre fevereiro de 2022 e janeiro de 2025, após uma formatação, normalização e balanceamento de classes, de forma a garantir a representatividade adequada das categorias de prioridade e de taxonomia de alertas.
+
+A segunda camada integra um modelo de Aprendizagem por Reforço (Reinforcement Learning - RL). 
+Este modelo é responsável por adaptar as previsões iniciais do Random Forest, incorporando feedback contínuo dos analistas do SOC relativamente à precisão das classificações automáticas realizadas. 
+A implementação de RL permite que o sistema evolua progressivamente à medida que novos casos e padrões de ameaças emergem, combatendo assim uma das limitações habituais dos modelos exclusivamente supervisionados.
+
+A integração prática da solução foi realizada diretamente no ambiente tecnológico da ArtResilia, com comunicação entre a plataforma IBM QRadar SOAR, o SIEM, e o módulo de ML desenvolvido, através de interfaces API específicas para previsões e recolha de feedback. 
+Este design permitiu assegurar um fluxo contínuo de dados em tempo real, respeitando os processos operacionais existentes e garantindo uma adoção progressiva da solução pelos analistas do SOC.
+
+A fase de validação incluiu testes locais (offline), bem como testes em ambiente real (produção). 
+Nos testes locais, o modelo Random Forest evoluiu significativamente ao longo de múltiplas versões de treino, destacando-se o progresso obtido entre a versão inicial (V1) e a versão final (V11), onde se verificou um aumento da precisão geral de classificação, tanto na atribuição de prioridade (P1, P2, P3) como de taxonomia (fraude, intrusões, conteúdos abusivos, entre outros). 
+Estas melhorias refletiram-se também nos valores de recall e F1-score, demonstrando uma maior capacidade do modelo em reconhecer corretamente eventos relevantes, particularmente nas categorias minoritárias que inicialmente apresentavam maior dificuldade de identificação.
+
+No ambiente de produção, a componente de RL passou a desempenhar um papel determinante, ajustando continuamente os seus parâmetros com base no feedback manual recolhido pelos analistas sobre as previsões emitidas. 
+Esta capacidade de aprendizagem incremental, aliada à robustez inicial do modelo Random Forest, permitiu à solução lidar de forma eficaz com a chegada de novos padrões de ataque não contemplados no conjunto de treino inicial, reforçando a sua aplicabilidade prática em contextos dinâmicos e em constante mutação.
+
+Do ponto de vista tecnológico, a implementação recorreu a um conjunto de ferramentas modernas e eficientes, como o Scikit-learn para o treino do modelo Random Forest, o Stable Baselines3 para o modelo RL, o FastAPI para a exposição dos serviços API, o Celery para o processamento assíncrono das tarefas de treino e o Redis para a gestão de comunicação entre os módulos. 
+Esta escolha tecnológica permitiu garantir escalabilidade, modularidade e facilidade de manutenção da solução proposta.
+
+A arquitetura modular da solução, bem como a sua integração transparente com o ambiente SOC, demonstrou ser eficaz em reduzir a carga de trabalho manual dos analistas, melhorar os tempos de resposta e deteção, e mitigar o risco associado à perda de alertas críticos devido a erros humanos ou à sobrecarga de trabalho.
+
+Em conclusão, o trabalho desenvolvido demonstra que a aplicação combinada de modelos supervisionados e de reforço permite obter ganhos significativos de eficiência operacional num SOC, contribuindo para uma melhor priorização de alertas, redução de falsos positivos, otimização da carga de trabalho dos analistas e, em última instância, para o fortalecimento da resiliência cibernética das organizações. 
 
 \end{abstractotherlanguage}
 
