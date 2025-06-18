@@ -145,3 +145,85 @@ As feedback is gathered, the RL model is expected to improve its performance ove
 For the live testing, the application will not be evaluated separately on the RF and RL models but will instead use both models as part of an integrated system. 
 During this phase, feedback from real-time predictions will be used to adjust and fine-tune the RL model's decisions. 
 The expectation is that with time, the RL model will show improvements in its ability to predict priority and taxonomy, surpassing the performance of the initial RF model version.
+
+This section describes the deployment and validation of the proposed system in a real-world setting, within the infrastructure of ArtResilia. 
+The goal was to evaluate the performance and operational viability of the integrated solution under realistic conditions. 
+This included the full deployment of the API, containerized services, integration with IBM QRadar SOAR via playbooks, and the subsequent observation and resolution of runtime constraints.
+
+\subsection{Deployment Architecture and Integration Workflow}
+
+Following the successful training of the RF model and implementation of the full API according to previously agreed specifications, a Swagger documentation interface was developed to facilitate integration with the security orchestration team. 
+This interface described the available endpoints and their expected input/output structure.
+
+The integration and deployment process involved several key steps:
+
+\begin{itemize}
+    \item \textbf{Swagger Delivery:} The Swagger API documentation was sent to the responsible party at ArtResilia. This enabled the creation of a custom playbook within IBM QRadar SOAR to handle ticket classification and feedback submission.
+    \item \textbf{VM Provisioning:} In parallel, a new virtual machine (VM) was prepared to host the deployed solution. Unlike the local development environment with 16GB of RAM, the testing VM had only 4GB of RAM. This difference significantly impacted the resource management strategy, particularly during RL model training.
+    \item \textbf{Dockerized Deployment:} To ensure portability and simplify environment replication, Docker was used to containerize the application. This approach offers several advantages over native installation, including consistent runtime environments, isolation of dependencies, simplified updates, and ease of monitoring and scaling individual services. The deployed architecture consisted of four containers:
+    \begin{enumerate}
+        \item \textbf{API and Bot Container:} Handles real-time prediction requests and exposes the REST endpoints.
+        \item \textbf{Celery Worker Container:} Executes background tasks such as RL model training based on analyst feedback.
+        \item \textbf{Flower Monitoring Container:} Provides a web interface for monitoring Celery tasks and Redis queue status.
+        \item \textbf{Redis Container:} Serves as the message broker between the API and Celery worker.
+    \end{enumerate}
+    \item \textbf{Shared Volume and Model Caching:} A shared Docker volume was mounted between the API and Celery containers to allow direct access to cached model files. This ensured consistency when loading and updating model versions during feedback-based training.
+    \item \textbf{Embedding Model Caching:} Due to strict firewall configurations enforced via iptables, the VM had no internet access outside the ArtResilia VPN. Therefore, pre-trained models such as Sentence-BERT were bundled directly into the Docker image to prevent the need for online downloads during runtime.
+    \item \textbf{Access Control via NGINX:} An NGINX reverse proxy was configured to provide external access to the API and the Flower dashboard. Basic HTTP authentication was enforced to restrict access to authorized users only.
+\end{itemize}
+
+\subsection{SOAR Integration via Playbook}
+
+The integration with IBM QRadar SOAR was implemented through an asynchronous playbook, designed to avoid disruption of SOC workflows in case the system became unavailable. The playbook behavior can be summarized as follows:
+
+\begin{itemize}
+    \item When a new ticket is created, a GET request is sent to the API to retrieve the predicted taxonomy and priority.
+    \item These predictions are displayed in the SOAR web interface in dedicated fields labeled ``Predicted Taxonomy'' and ``Predicted Priority''.
+    \item Upon ticket closure, the actual analyst-defined values for taxonomy and priority are submitted to the API via a POST request to trigger the feedback learning mechanism.
+    \item The playbook was configured to execute asynchronously. This ensures that even if the prediction system is temporarily offline, the SOAR platform continues to operate normally, skipping the classification step without interruption.
+\end{itemize}
+
+\subsection{Runtime Challenges and Solutions}
+Upon initial deployment, the system began to operate successfully, processing classification requests for incoming tickets.
+However, problems emerged when the RL model attempted to train based on the feedback data. 
+
+\paragraph{Memory Problem}
+The Celery container crashed due to memory exhaustion, consuming over 4GB of RAM plus all available swap space.
+
+To address this problem:
+\begin{itemize}
+    \item A new VM with 8 GB of RAM was provisioned, but the same crashes reoccurred during RL training.
+    \item Since further increasing the VM's memory was not a sustainable solution, a custom memory management strategy was developed using Python's built-in gc (garbage collector) module.
+\end{itemize} 
+
+\paragraph{Solution - Custom Garbage Collection Strategy}
+
+To reduce memory usage, a targeted cleanup process was applied at the end of each Celery training task. 
+This was done by explicitly deleting large intermediate variables and invoking Python's garbage collector.
+
+\vspace{0.2cm}
+\noindent
+\begin{minipage}{\linewidth}
+\begin{minted}{python}
+del {variable_name}
+gc.collect()
+\end{minted}
+\captionof{listing}{Custom Garbage Collection Strategy}
+\label{lst:custom_gc_strategy}
+\end{minipage}
+\vspace{0.1cm}
+
+The code in Listing~\ref{lst:custom_gc_strategy} performs explicit memory management in Python. 
+Line 1 explicitly deletes a variable from memory, removing its reference and making it eligible for garbage collection. 
+Line 2 then manually triggers Python's garbage collector to immediately reclaim memory from objects that are no longer referenced.
+
+This strategy ensured that each training session released its memory footprint before the next one started. 
+After implementing this fix, memory usage was stabilized and kept under 6GB, preventing further crashes and allowing uninterrupted operation.
+
+\subsection{Results and Observations}
+
+With the system stabilized, the final step was to let it run uninterrupted for a continuous period to gather performance metrics. 
+During this period, the system operated in parallel with the standard SOC workflow, producing live predictions and processing analyst feedback asynchronously.
+
+
+
