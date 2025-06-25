@@ -132,3 +132,88 @@ This appendix presents the raw outputs of the models for Version 1 and Version 1
     \item \textbf{Macro Average:} Precision 0.90, Recall 0.90, F1-Score 0.90
     \item \textbf{Weighted Average:} Precision 0.90, Recall 0.90, F1-Score 0.90
 \end{itemize}
+
+\chapter{Daily Prediction Accuracy During Live Testing}
+\label{AppendixB}
+
+This appendix presents the daily statistics on model prediction accuracy during the 15-day live testing period described in Chapter~\ref{chap:Chapter4}. 
+
+The values were derived from a CSV file exported directly from the SOAR platform, containing feedback data for each alert processed by the system. 
+The data includes the number of predictions where both the priority and taxonomy labels matched the values later submitted by the analysts (considered as "correct" predictions), as well as the total number of predictions made per day.
+
+\begin{table}[h!]
+\centering
+\caption{Daily Prediction Statistics During Live Testing}
+\label{tab:live_daily_accuracy}
+\begin{tabular}{@{}ccc@{}}
+\toprule
+\textbf{Day} & \textbf{Correct Predictions} & \textbf{Accuracy} \\
+\midrule
+0 & 23 / 47 & 48.9\% \\
+1 & 27 / 53 & 50.9\% \\
+2 & 2 / 67 & 3.0\% \\
+3 & 1 / 17 & 5.9\% \\
+4 & 0 / 9 & 0.0\% \\
+5 & 6 / 47 & 12.8\% \\
+6 & 1 / 28 & 3.6\% \\
+7 & 1 / 28 & 3.6\% \\
+10 & 9 / 17 & 52.9\% \\
+11 & 2 / 13 & 15.4\% \\
+12 & 19 / 69 & 27.5\% \\
+13 & 18 / 62 & 29.0\% \\
+14 & 2 / 58 & 3.4\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[h!]
+    \centering
+    \caption{Live Priority Classification Metrics}
+    \label{tab:live_priority_metrics}
+    \begin{tabular}{|l|c|c|c|c|}
+    \hline
+    \textbf{Class} & \textbf{Precision} & \textbf{Recall} & \textbf{F1-Score} & \textbf{Support} \\
+    \hline
+    P1 & 0.30 & 0.13 & 0.18 & 47 \\
+    \hline
+    P2 & 0.41 & 0.28 & 0.34 & 209 \\
+    \hline
+    P3 & 0.50 & 0.68 & 0.58 & 259 \\
+    \hline
+    \end{tabular}
+\end{table}
+
+\begin{itemize}
+    \item \textbf{Overall Accuracy:} 47\%
+    \item \textbf{Macro Average:} Precision 0.41, Recall 0.36, F1-Score 0.36
+    \item \textbf{Weighted Average:} Precision 0.45, Recall 0.47, F1-Score 0.44
+\end{itemize}
+
+\begin{table}[h!]
+    \centering
+    \caption{Live Taxonomy Classification Metrics}
+    \label{tab:live_taxonomy_metrics}
+    \begin{tabular}{|l|c|c|c|c|}
+    \hline
+    \textbf{Class} & \textbf{Precision} & \textbf{Recall} & \textbf{F1-Score} & \textbf{Support} \\
+    \hline
+    Availability & 0.90 & 0.20 & 0.33 & 45 \\
+    \hline
+    Fraud & 0.82 & 0.44 & 0.57 & 126 \\
+    Information Gathering & 0.00 & 0.00 & 0.00 & 13 \\
+    \hline
+    Information Security & 0.25 & 0.71 & 0.37 & 94 \\
+    Intrusion Attempts & 0.26 & 0.29 & 0.27 & 62 \\
+    Intrusions & 0.38 & 0.15 & 0.21 & 40 \\
+    Malicious Code & 0.95 & 0.44 & 0.60 & 132 \\
+    Other & 0.00 & 0.00 & 0.00 & 2 \\
+    Vulnerable & 0.00 & 0.00 & 0.00 & 1 \\
+    \hline
+    \end{tabular}
+\end{table}
+
+\begin{itemize}
+    \item \textbf{Overall Accuracy:} 41\%
+    \item \textbf{Macro Average:} Precision 0.39, Recall 0.25, F1-Score 0.26
+    \item \textbf{Weighted Average:} Precision 0.63, Recall 0.41, F1-Score 0.44
+\end{itemize}

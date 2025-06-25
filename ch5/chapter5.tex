@@ -8,25 +8,36 @@ The discussion reflects on the accomplishments of the current system while ident
 
 While the current solution shows what can be done in automating the security alert triage process, there remain several areas for future improvement and refinement. 
 
-One promising direction for future work involves the expansion of the training dataset. 
-While the current model uses a historical dataset to train the RF model, it could benefit from a broader range of data sources. 
-Integrating real-time data streams and continuously feeding the system with updated alerts will allow the models to adapt more quickly to evolving attack vectors. 
-The inclusion of external sources, such as threat intelligence feeds and behavioral data, may help improve the model's ability to detect and classify previously unseen threats.
+First, one of the main limitations observed in the live environment was the system's reduced ability to generalize to underrepresented or noisy alert categories. 
+Future iterations should therefore focus on enhancing dataset diversity and volume. 
+In particular, having larger and more balanced datasets, either through long-term data accumulation or synthetic data generation, could significantly improve the mode's ability to generalize in production settings.
 
-Furthermore, enhancing the interpretability of the models, particularly the RL component, would be beneficial. 
-While the current system provides high adaptability and can reduce false positives, the underlying decision-making process of the RL model remains relatively opaque. 
-Implementing techniques such as SHAP (SHapley Additive exPlanations) or LIME (Local Interpretable Model-Agnostic Explanations) could help increase transparency, allowing analysts to better understand why certain predictions are made and improving trust in the system.
+Secondly, the RL component requires a longer feedback window to become fully effective. 
+Extending the live testing period and accumulating more high-quality, consistent feedback will allow the RL model to adapt its policy more accurately. 
+Additionally, implementing stronger input validation and preprocessing for feedback, particularly to handle inconsistencies in label formatting—would improve the success rate of training tasks and reduce noise during learning.
 
-In terms of model optimization, future work could explore hyperparameter tuning for both the RF and RL models. 
-While the current version uses a well-optimized set of parameters, there remains room for improvement through more advanced techniques such as automated machine learning (AutoML) or Bayesian optimization. 
-These approaches could help identify the optimal configuration for both models, enhancing their overall performance in terms of accuracy, recall, and the ability to generalize across diverse security scenarios.
+Model explainability also remains an open area. 
+While the system functions well as a black-box predictor, integrating interpretable ML tools such as SHAP or LIME could help analysts understand the rationale behind predictions. 
+This would be especially important for justifying decisions in high priority cases and for refining model behavior in edge scenarios.
 
-Finally, the system's real-time performance in a live production environment could be further explored. 
-Currently, the RL model is expected to improve over time based on feedback. 
-However, integrating continuous model evaluation and performance tracking will allow for more dynamic model updates. 
-A feedback loop that accounts for the effectiveness of predictions in real-world conditions could lead to faster model adaptation, thereby improving the accuracy and efficiency of the system in managing alerts. 
-Regularly monitoring the system's real-world performance will help identify any gaps and enable proactive updates.
+From an engineering perspective, future work could also include fine-grained monitoring of per-class performance in real time, enabling automated retraining triggers when class-specific accuracy drops below thresholds. 
+Moreover, improvements in resource handling—such as memory-efficient training procedures and container orchestration—would further strengthen the system's robustness under constrained environments.
 
-So while the solution has proven effective in its current form, future advancements in data collection, model training, interpretability, and real-time performance tracking will be critical to ensuring that the bot remains adaptable to emerging threats and continues to provide accurate predictions in complex, dynamic environments.
+Finally, exploring ensemble strategies that dynamically balance the contribution of the RF and RL components based on confidence levels or historical performance could lead to better hybrid predictions. 
+This would help the system adaptively prioritize models depending on alert complexity and feedback richness.
 
 \section{Conclusion}
+
+This work presented the design, implementation, and evaluation of an intelligent system for automating security alert triage, integrating supervised learning via a RF classifier with a RL agent capable of evolving based on analyst feedback. 
+The system was successfully deployed within a live SOC environment, where it processed real alerts, adapted to feedback, and maintained integration with existing tools such as IBM QRadar SOAR.
+
+In controlled local testing, the RF model demonstrated excellent classification accuracy and recall across both priority and taxonomy labels. 
+In the live environment, the hybrid system showed initial promise, successfully processing hundreds of alerts while adapting to real-world constraints such as inconsistent data and limited resources. 
+Although the RL model had not yet reached its full potential within the short evaluation window.
+
+The successful deployment of a containerized architecture, the integration with SOAR platforms, and the implementation of asynchronous training workflows via Celery and Flower confirm the operational feasibility and practical value of augmenting SOC operations with intelligent, adaptive models.
+
+While challenges remain—particularly in generalizing to minority classes and scaling learning over time, the progress demonstrated in this work offers a strong foundation for future development. With continued refinement, broader datasets, and longer deployment times, this approach has the potential to significantly reduce analyst workload, increase triage accuracy, and enhance the responsiveness of SOC operations to emerging threats.
+
+This thesis concludes with the conviction that combining classical machine learning with reinforcement learning in real-time SOC workflows is feasible and promising towards a smarter, more autonomous cybersecurity system.
+
